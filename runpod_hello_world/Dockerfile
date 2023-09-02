@@ -1,4 +1,4 @@
-from python:3.11.1-buster
+from pytorch/pytorch:latest
 
 WORKDIR /
 

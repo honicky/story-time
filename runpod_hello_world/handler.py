@@ -1,22 +1,24 @@
 import runpod
-import os
-import time
+import torch
 
-sleep_time = int(os.environ.get('SLEEP_TIME', 3))
+# import os
+import json
+# import time
+
+# sleep_time = int(os.environ.get('SLEEP_TIME', 3))
 
 # load lamma-2-70B-instruct from huggingface
 
 
 def handler(event):
-    print(event)
-    time_slept = 0
-    while time_slept < sleep_time:
-        print("working, I promise")
-        time_slept += 1
-        time.sleep(1)
+    #    print(event)
+    # time_slept = 0
+    # while time_slept < sleep_time:
+    #     print("working, I promise")
+    #     time_slept += 1
+    #     time.sleep(1)
     # do the things
-
-    return "Hello World"
+    return { 'cuda': torch.cuda.is_available() }
 
 
 runpod.serverless.start({
