@@ -20,16 +20,16 @@ beam deploy app.py:generate
 """
 from beam import App, Runtime, Image, Output, Volume, VolumeType
 
-
+import json
 import torch
 import transformers
-from transformers import AutoTokenizer
+from transformers import ( AutoTokenizer, pipeline )
 
-name = 'mosaicml/mpt-13b-instruct'
+name = 'mosaicml/mpt-7b-instruct'
 
 
 app = App(
-    name="mpt-30b-instruct",
+    name="mpt-7b-instruct",
     runtime=Runtime(
         cpu=8,
         memory="32Gi",
@@ -45,6 +45,7 @@ app = App(
                 "torch",
                 "sentencepiece",
                 "einops",
+                # "triton-pre-mlir@git+https://github.com/vchiley/triton.git@triton_pre_mlir#subdirectory=python",
             ],
         ),
     ),
@@ -63,9 +64,11 @@ def generate(**inputs):
     prompt = inputs["prompt"]
 
     config = transformers.AutoConfig.from_pretrained(name, trust_remote_code=True)
-    config.attn_config['attn_impl'] = 'triton'  # change this to use triton-based FlashAttention
+    # config.attn_config['attn_impl'] = 'torch'  # change this to use triton-based FlashAttention
+    # config.attn_config['attn_impl'] = 'triton'  # change this to use triton-based FlashAttention
+    # config.init_device = 'meta' # For fast initialization directly on GPU!
     config.init_device = 'cuda:0' # For fast initialization directly on GPU!
-    config.max_seq_len = 16384 # (input + output) tokens can now be up to 16384
+    # config.max_seq_len = 16384 # (input + output) tokens can now be up to 16384
 
 
     model = transformers.AutoModelForCausalLM.from_pretrained(
@@ -73,24 +76,26 @@ def generate(**inputs):
         config=config,
         torch_dtype=torch.bfloat16, # Load model weights in bfloat16
         trust_remote_code=True,
-        load_in_8bit=True
+        # load_in_8bit=True
     )
 
     tokenizer = AutoTokenizer.from_pretrained('mosaicml/mpt-30b')
 
-    pipe = pipeline('text-generation', model=model, tokenizer=tokenizer, device='cuda:0')
+    # pipe = pipeline('text-generation', model=model, tokenizer=tokenizer, device='cuda:0')
+    pipe = pipeline('text-generation', model=model, tokenizer=tokenizer)
     with torch.autocast('cuda', dtype=torch.bfloat16):
-        decoded_output = pipe('Here is a recipe for vegan banana bread:\n',
-            max_new_tokens=100,
+        decoded_output = pipe(prompt,
+            max_new_tokens=250,
             do_sample=True,
             use_cache=True
         )
 
-
     print(decoded_output)
+
+    generated_text = decoded_output[0]['generated_text']
 
     # Write text output to a text file, which we'll retrieve when the async task completes
     output_path = "output.txt"
     with open(output_path, "w") as f:
-        f.write(decoded_output)
+        f.write(generated_text)
 
