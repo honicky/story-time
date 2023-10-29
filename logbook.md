@@ -16,6 +16,7 @@
     gh act -s GITHUB_TOKEN=${GITHUB_TOKEN} --secret-file .secrets --var-file .vars
     ```
     to test deployment
+* trivial change to trigger github action
 
 ## 2023-10-06
 - setting up cloudfront to serve CORS.  Set up a Behavior in CloudFront, and also a policy in S3.  Neither worked... maybe I need to wait for the S3 setting propagate?
