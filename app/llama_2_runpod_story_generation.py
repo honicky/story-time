@@ -6,7 +6,7 @@ import requests
 import time
 import vocab
 
-RUNPOD_SECRET_KEY = os.environ["RUNPOD_SECRET_KEY"]
+      timeout=120,
 BASE_URL = "https://api.runpod.ai/v2/llama2-13b-chat"
 
 headers = {

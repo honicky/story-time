@@ -21,4 +21,5 @@ class Boto3Client:
     def upload_object(self, file_body: bytes, bucket_name: str, key: str) -> None:
         s3_client = self.boto3_client.resource("s3").Bucket(bucket_name)
         mime_type, _ = mimetypes.guess_type(key)
+        print(f"Uploading {key} with mime type {mime_type}")
         s3_client.put_object(Body=file_body, Key=key, ContentType=mime_type)
