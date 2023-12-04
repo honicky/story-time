@@ -1,6 +1,7 @@
 import boto3
 import mimetypes
 import os
+import requests
 
 class Boto3Client:
     def __init__(self):
@@ -23,3 +24,21 @@ class Boto3Client:
         mime_type, _ = mimetypes.guess_type(key)
         print(f"Uploading {key} with mime type {mime_type}")
         s3_client.put_object(Body=file_body, Key=key, ContentType=mime_type)
+
+    def upload_from_url(self, url: str, bucket_name: str, key_prefix: str) -> None:
+        # Get the file name from the URL
+        file_name = os.path.basename(url)
+        # Combine the key prefix with the file name
+        key = os.path.join(key_prefix, file_name)
+
+        # Download the file from the URL
+        response = requests.get(url)
+        if response.status_code == 200:
+            # Upload the file to S3
+            self.upload_object(response.content, bucket_name, key)
+            print(f"File uploaded to {bucket_name}/{key}")
+            return key
+        else:
+            print(f"Failed to download file from {url}")
+            return None
+        

@@ -1,10 +1,12 @@
 import argparse
 import json
 import os
-import uuid
 import openai
 import requests
 import time
+import uuid
+
+import object_store_client
 
 
 class NextLegClient:
@@ -35,7 +37,7 @@ class NextLegClient:
             raise Exception("Image generation failed")
 
         if retry_count >= self.max_retries:
-            raise Exception("Max retries exceeded")
+            raise Exception(f"Max retries exceeded: {image_response_data}")
 
         if image_response_data.get("progress") and image_response_data.get(
             "progressImageUrl"
@@ -59,7 +61,7 @@ class NextLegClient:
             f"{self.ppu_url}/imagine",
             headers=self.headers,
             json={
-                "msg": f"{prompt}. Water color, semi-abstract stylized artistic --relax"
+                "msg": f"{prompt}. --relax"
             },
             timeout=120,
         )
@@ -86,7 +88,16 @@ class NextLegClient:
         # Extract and return the array of image URLs
         image_urls = completed_image_data.get("response", {}).get("imageUrls", [])
         if image_urls and isinstance(image_urls, list):
-            return image_urls
+            client = object_store_client.Boto3Client()
+            generation_id = uuid.uuid4()
+            return [
+                construct_image_url(
+                    client.upload_from_url(
+                        image_url, "botos-generated-images", f"generated-images/{generation_id}"
+                    )
+                )
+                for image_url in image_urls 
+            ]
         else:
             raise Exception("No image URLs found in the response")
 
@@ -104,7 +115,7 @@ class NextLegClient:
             json=payload,
             timeout=120,
         )
-
+        import pdb; pdb.set_trace()
         if response.status_code == 200:
             return response.content
         else:
@@ -141,7 +152,6 @@ class NextLegException(Exception):
             error_code, "Unknown error code"
         )
         super().__init__(f"{self.error_code}: {self.error_description}")
-
 
 class DalleClient:
     def __init__(self, openai_api_key):
@@ -248,26 +258,27 @@ class StableDiffusionClient:
             time.sleep(interval)
             retries += 1
 
-    def _construct_image_url(self, payload):
-        return f"http://botos-generated-images.s3-website-us-east-1.amazonaws.com/{payload['object_key']}"
-
     def generate_image(self, prompt):
         payload = self._create_sdxl_payload(prompt)
         response = self._query_sdxl_endpoint(payload)
         if response.status_code == 200:
             task_id = response.json().get('task_id')
             self.wait_for_complete(task_id)
-            return {"url": self._construct_image_url(payload)}
+            return [ construct_image_url(payload['object_key']) ]
 
         else:
-            return {
+            return [ {
                 "error": f"Failed to generate image. Status code: {response.status_code} Response: {response.text}",
-            }
+            } ]
+
+
+def construct_image_url(object_key):
+    return f"https://www.storytime.glass/{object_key}"
 
 
 def generate_image_with_client(client_type, prompt):
     if client_type == 'nextleg':
-        auth_token = os.environ.get("NEXTLEG_AUTH_TOKEN")
+        auth_token = os.environ.get("THE_NEXT_LEG_API_TOKEN")
         client = NextLegClient(auth_token)
     elif client_type == 'dalle':
         openai_api_token = os.environ.get("OPENAI_API_TOKEN")

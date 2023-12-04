@@ -34,7 +34,7 @@ For example, you can include elements like {specific_setting_description}.
 
     prompt += """
 Please provide a detailed visual description of this setting that I can use to do
-one or more drawings or paintings
+one or more drawings or paintings. This description should be about one paragraph long.
 """
 
     return prompt
@@ -57,45 +57,39 @@ Describe the character's clothing and any accessories they may have, including s
 
 Consider the setting of the story when describing each character.
 
-Use only about 3 sentences for each character.
+Use only about 3 sentences to describe the character.
 """
 
 
-def generate_detailed_setting_prompt():
-    return """Ok, now from each of the sub-settings in your description,
-construct a single sentence image prompt for an image generating model.
+def generate_setting_prompt_for_sdxl(setting_description):
+    return f"""Use the following setting description to create an image prompt for a text-to-image model:
 
-Place each setting inside of <setting></setting> tags.
+{setting_description}
 
-Also create a sinlge sentence image prompt for the overall setting
-and put it in between <cover-setting></cover-setting> tags."""
+The output should be about ten words that captures the most important visual elements of the setting, including
+objects, colors, textures and mood.  Do not include description of characters in the setting.
+"""
 
+def generate_character_prompt_for_sdxl(character_description):
+    return f"""Use the following character description to create an image prompt for a text-to-image model:
 
-def generate_character_image_prompt():
-    return """Ok, now take each of these characters you have generated above, and create a concise
-visual description that I can use to do one or more drawings or paintings.  Make sure
-to include visual details such as the color of the character's hair, eyes, skin, as well
-as details about the character's clothing and any accessories they may have, including style.
+{character_description}
 
-It is very important that you place each character description inside of <character-description></character-description> tags
-so that I can extract the visual description from the text.
-
-Also, it is important that the description is concise and does not contain any extra text.  Use key words
-instead of full sentences.  You should use 15 words.
+The output should be about ten words that captures the most important visual elements of the character, including species if not human,
+gender, skin, hair, eyes, clothing, accessories, stature.  Make sure to include gender and species.  Really include species if not human,
+and gender or an innocent puppy will die. 
+Do not include description of the setting.
 """
 
 
-
-def generate_story_skeleton_prompt(story):
-    subsettings_str = generate_subsettings_str(story)
-    characters_str = generate_characters_str(story)
+def generate_story_prompt(story):
 
     return f"""
 Here is the setting of the story:
 {story['setting']['setting_text']}
 
-Here are the characters of the story:
-{characters_str}
+Here is the main character for the story:
+{story['character']['description']}
 
 This story is a {story['outline']['StoryStructure']['type']} story
 with a {story['outline']['Tone']['type']} tone. 
@@ -104,29 +98,32 @@ A {story['outline']['StoryStructure']['type']} type story can be described as
 {story['outline']['StoryStructure']['description']}. Please take inspiration from
 stories like {story['outline']['StoryStructure']['example']}.
 
-The setting on the cover image of the story is:
-{story['setting']['cover_setting']}
+The setting for the story is:
+{story['setting']['setting_text']}
 
-Here is a list of the sub-settings of the story:
-{subsettings_str}
-
-Using these this information as inspiration, write a story skeleton in which the characters
-take actions in each sub-setting.  The skeleton should indicate using what happens in the
-story using one sentence per scene.  The skeleton should read like a very short story.
-
-For each sub-setting, write a sentence that describes what happens in a scene in the story in that sub-setting,
-and who is in the scene.  Each scene should be proceeded by a number indicating the subsetting of the scene.
-For example
-
-1. The foobar went to the closet to get a broom, but the broom was not there, and it wondered where it could be.
-2. The foobar and the baz checked in the kitchen, bit was not there either.
-
-Do not provide any other structure to the story skeleton, besides the numbered list. 
+Please generate a story based on this information. The story should be about
+5-10 paragraphs long.  Each paragraph should only be 1-2 simple sentences,
+appropriate for a 3 year old child to follow easily.
 """
 
+def generate_paragraph_image_prompt(setting_text, character_description, story_paragraph_text):
+    return f"""
+    Generate an image prompt for a text-to-image model based on the following information:
 
-def generate_characters_str(story):
-    return generate_numbered_list_str(story["characters"]["descriptions"])
+    Setting: {setting_text}
+
+    Main Character: {character_description}
+
+    Action paragraph: {story_paragraph_text}
+
+    The output should only describe what the main character is doing in the action paragraph. It should be about 10 words long.
+    Always included exactly the following details about the main character:
+    1. Species (if not human)
+    2. Gender (if human)
+    Do not include anyextra detail about the setting or character except for what is explicitly mentioned
+    in the Action paragraph.
+    """
+
 
 def generate_numbered_list_str(items):
     return "\n".join(
@@ -153,32 +150,3 @@ For each scene, render XML that contains the following tags:
 
 Be sure to use XML as described above, and to wrap each scene in <scene></scene> tags.
 """
-
-def generate_scene_image_prompt(story):
-    subsettings_prompts = generate_subsettings_str(story)
-    characters_prompt_str = generate_numbered_list_str(story["characters"]["prompts"])
-    scene_descriptions = generate_scene_descriptions(story)
-
-    return f"""Here are the setting image promtps for the story:
-{subsettings_prompts}
-
-Here are the characters image prompts for the story:
-{characters_prompt_str}
-
-Here are the scene descriptions:
-{scene_descriptions}
-
-For each of these scene descriptions, generate a prompt I can use to generate an image for the scene.
-The prompt should be a single sentence that describes the scene. Use combine the text of the charater prompts
-and with the setting prompts and scene descriptions to create a single sentence prompt for each scene.
-
-It is important that the description is concise and does not contain any extra text.  Use key words
-instead of full sentences.  You should use around 30 words.  The prompt focus on the main visual elements
-of the scene, and add detail for each character in the scene across all of the prompts.
-"""
-
-def generate_scene_descriptions(story):
-    return "\n".join(
-        f"""{i+1}. {scene}"""
-        for i, scene in enumerate(story["scenes"])
-    )

@@ -1,5 +1,39 @@
 # Logbook
 
+## 2023-12-2 and 2023-12-3
+
+* Use midjourney to generate images
+  * https://midlibrary.io/ has a list of prompts to get specific artists and sytles
+  * TODO: pick one or styles corresponding to each tone and maybe story type
+
+* Add story-viz
+  * show the images plus prompts
+  * TODO: select the best images from all of the generated images
+  * TODO: regenerate the images
+  * TODO: alter the prompts
+  * TODO: regereate a section of the story
+  * TODO: save the story metatdata to a library
+  * TODO: cycle through today's story, pick a new story once per day (only new stories?  From the library?)
+
+* other ideas
+  * Get feedback from user
+    * like a story - add it to my library
+    * dislike or flag an image
+  * app that can build a story with a kid interactively
+    * allow them to prompt for changes to the story
+    * allow them to regenerate images (similar to story viz)
+    * watch the camera and interact via voice
+      * notice when new people are there, have a coversation with them
+      * co-create a story
+      * read the story to the kid
+    * share your stories with the community
+      * popular stories give reinforcement to story quality
+    
+
+
+## 2023-11-24 and 2023-11-25
+
+ * use 
 
 ## 2023-10-28
 
