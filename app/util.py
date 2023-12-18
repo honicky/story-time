@@ -3,6 +3,8 @@ from PIL import Image
 import requests
 import time
 
+# from transformers import CLIPProcessor
+
 def current_time_ms():
     return time.time() * 1000
 
@@ -19,6 +21,14 @@ def url_to_pil_image(url):
 
   return Image.open(BytesIO(response.content))
 
-# Example usage
-# image = url_to_pil_image("https://example.com/image.jpg")
-# image.show()
+# def count_clip_tokens(text, model_name="openai/clip-vit-base-patch16"):
+#     # Load the CLIP tokenizer
+#     processor = CLIPProcessor.from_pretrained(model_name)
+
+#     # Tokenize the text
+#     tokens = processor(text, return_tensors="pt").input_ids
+
+#     # Count the number of tokens
+#     num_tokens = tokens.size(1)
+    
+#     return num_tokens

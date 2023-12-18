@@ -25,9 +25,12 @@ class Boto3Client:
         print(f"Uploading {key} with mime type {mime_type}")
         s3_client.put_object(Body=file_body, Key=key, ContentType=mime_type)
 
-    def upload_from_url(self, url: str, bucket_name: str, key_prefix: str) -> None:
+    def upload_from_url(self, url: str, bucket_name: str, key_prefix: str, target_id: str = None) -> None:
         # Get the file name from the URL
         file_name = os.path.basename(url)
+        if target_id is not None:
+            file_name = insert_image_id(file_name, target_id)
+
         # Combine the key prefix with the file name
         key = os.path.join(key_prefix, file_name)
 
@@ -41,4 +44,8 @@ class Boto3Client:
         else:
             print(f"Failed to download file from {url}")
             return None
-        
+
+
+def insert_image_id(url, id):
+    base, suffix = url.rsplit('.', 1)
+    return f"{base}-{id}.{suffix}"

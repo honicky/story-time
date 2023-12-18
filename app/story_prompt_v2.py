@@ -11,6 +11,7 @@ from util import current_time_ms, url_to_pil_image
 import image_prompt
 import llm_prompt
 import object_store_client
+import mongo_client
 import prompt_templates
 
 import wandb
@@ -111,12 +112,22 @@ def store_story_in_s3(story_descriptor, run_name):
     client.upload_object(story_descriptor, bucket_id, story_descriptor_key)
     return story_descriptor_key
 
+def store_story_in_mongo(story_descriptor):
+    mongo = mongo_client.StoryMongoDB()
+    story_id = None
+    try:
+        story_id = mongo.insert_story(story_descriptor)
+    finally:
+        mongo.close_connection()
+    return story_id
+
 try:
-    next_leg_token = os.environ.get("THE_NEXT_LEG_API_TOKEN")
-    image_client = image_prompt.NextLegClient(next_leg_token)
+    # next_leg_token = os.environ.get("THE_NEXT_LEG_API_TOKEN")
+    # image_client = image_prompt.NextLegClient(next_leg_token)
     # dalle_client = DalleClient(openai_api_token)
     # beam_api_token = os.environ.get("BEAM_SECRET_KEY_UUENCODED")
     # image_client = image_prompt.StableDiffusionClient(beam_api_token, "botos-generated-images", "dev-test-user")
+    image_client = image_prompt.ReplicateClient("sdxl")
 
     def generate_image(prompt):
         print(f"Generating image for prompt: {prompt} ...", end="", flush=True )
@@ -248,8 +259,11 @@ try:
             for paragraph, paragraph_image_prompt, image_prompt in zip(paragraphs, paragraph_image_prompts, image_prompts)
         ]
 
-    story_key_s3 = store_story_in_s3(json.dumps(story, indent=2), run.name)
-    print(f"Story descriptor: https://www.storytime.glass/{story_key_s3}")
+    story["run_name"] = run.name
+    story["version"] = "v2.1.0"
+    story_id = store_story_in_mongo(story)
+
+    print(f"Story id: {story_id}")
 
 finally:
     root_span._span.end_time_ms = current_time_ms()

@@ -1,0 +1,96 @@
+{  
+  "$jsonSchema": {
+    "type": "object",
+    "properties": {
+      "outline": {
+        "type": "object",
+        "properties": {
+          "StoryStructure": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "example": { "type": "string" }
+            },
+            "required": ["type", "description", "example"]
+          },
+          "Setting": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "example": { "type": "string" }
+            },
+            "required": ["type", "description", "example"]
+          },
+          "Character": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "example": { "type": "string" }
+            },
+            "required": ["type", "description", "example"]
+          },
+          "Style": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "example": { "type": "string" }
+            },
+            "required": ["type", "description", "example"]
+          },
+          "Tone": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "example": { "type": "string" }
+            },
+            "required": ["type", "description", "example"]
+          },
+          "CulturalSetting": { "type": "string" },
+          "EverydayPublicPlace": { "type": "string" }
+        },
+        "required": ["StoryStructure", "Setting", "Character", "Style", "Tone"]
+      },
+      "setting": {
+        "type": "object",
+        "properties": {
+          "setting_text": { "type": "string" },
+          "image_prompt": { "type": "string" }
+        },
+        "required": ["setting_text", "image_prompt"]
+      },
+      "character": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "image_prompt": { "type": "string" }
+        },
+        "required": ["description", "image_prompt"]
+      },
+      "story_text": { "type": "string" },
+      "pages": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "paragraph": { "type": "string" },
+            "paragraph_image_prompt": { "type": "string" },
+            "image_prompt": { "type": "string" },
+            "image_urls": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["paragraph", "paragraph_image_prompt", "image_prompt", "image_urls"]
+        }
+      },
+      "version": { "type": "string" },
+      "run_name": { "type": "string" }
+    },
+    "required": ["outline", "setting", "character", "story_text", "pages", "version"]
+  }
+}

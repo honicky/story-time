@@ -12,42 +12,69 @@ function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
+// const SlideshowWrapper = ({ jsonUrl, interval }) => {
+//   const [pages, setPages] = useState([]);
+
+//   useEffect(() => {
+//     if (jsonUrl) {
+//       axios.get(jsonUrl).then((response) => {
+//         setPages(response.data.pages);
+//       });
+//     }
+//   }, [jsonUrl]);
+
+//   return <Slideshow pages={pages} interval={interval} />;
+// };
+
+
 const SlideshowWrapper = () => {
-  const [userId, setUserId] = useState('rj-test-user'); // Default user_id
+  const [story, setStory] = useState({});
+  const [storyUrl, setStoryUrl] = useState('');
+  const [interval, setInterval] = useState(5);
   const query = useQuery();
 
-  const [imagePaths, setImagePaths] = useState([]);
-  const [sentences, setSentences] = useState([]);
-
   useEffect(() => {
-    const userIdParam = query.get('user_id');
-    if (userIdParam) {
-      setUserId(userIdParam);
+    const storyUrlParam = query.get('story_url');
+    if (storyUrlParam) {
+      setStoryUrl(storyUrlParam);
+    }
+
+    const intervalParam = query.get('interval');
+    if (intervalParam) {
+      setInterval(parseInt(intervalParam));
     }
   }, [query]);
 
   useEffect(() => {
-    if (userId) {
-      axios.get(`/${userId}/story_descriptor.json`).then((response) => {
-        setImagePaths(response.data.image_paths);
-        setSentences(response.data.sentences);
+    if (storyUrl) {
+      axios.get(storyUrl).then((response) => {
+        setStory(response.data);
       });
     }
-  }, [userId]);
+  }, [storyUrl]);
 
-  return <Slideshow images={imagePaths} sentences={sentences} />;
+  return <Slideshow story={story} interval={interval} />;
 };
 
 const App = () => {
   return (
     <HashRouter>
-      <div>
-        <Routes>
-          <Route path="/" element={<SlideshowWrapper />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<SlideshowPage />} />
+      </Routes>
     </HashRouter>
   );
 };
 
+const SlideshowPage = () => {
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+
+  const jsonUrl = query.get('jsonUrl');
+  const interval = parseInt(query.get('interval')) || 5; // Default to 5 seconds
+
+  return <SlideshowWrapper jsonUrl={jsonUrl} interval={interval} />;
+};
+
 export default App;
+

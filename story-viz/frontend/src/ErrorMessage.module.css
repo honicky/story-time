@@ -1,0 +1,20 @@
+.errorContainer {
+    background-color: #ffdddd; /* Light red background */
+    color: #d8000c; /* Darker red text */
+    padding: 10px; /* Some padding for space */
+    margin: 10px 0; /* Margin to separate it from other content */
+    border: 1px solid #d8000c; /* Border to make it stand out */
+    border-radius: 5px; /* Rounded corners */
+    text-align: center; /* Centered text */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    font-size: 1em; /* Font size */
+    font-weight: bold; /* Bold font for visibility */
+}
+  
+/* Responsive for smaller screens */
+@media (max-width: 600px) {
+    .errorContainer {
+        font-size: 0.9em; /* Slightly smaller font on small screens */
+    }
+}
+  

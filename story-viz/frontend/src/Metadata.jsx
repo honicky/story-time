@@ -1,7 +1,11 @@
 // Metadata.js
 import React from 'react';
 
-const Metadata = ({ data, jsonUrl }) => {
+const Metadata = ({ data, storyUrl }) => {
+  if (!data) {
+    return <div>Loading...</div>;
+  }
+  
   return (
     <div style={{ padding: '10px', border: '1px solid #ccc', marginBottom: '20px' }}>
       <h2>Story Outline</h2>
@@ -17,7 +21,7 @@ const Metadata = ({ data, jsonUrl }) => {
           )}
         </div>
       ))}
-      {jsonUrl && <a href={jsonUrl} target="_blank" rel="noopener noreferrer">View JSON File</a>}
+      {storyUrl && <a href={storyUrl} target="_blank" rel="noopener noreferrer">View JSON File</a>}
     </div>
   );
 };

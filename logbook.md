@@ -1,10 +1,26 @@
 # Logbook
 
+## 2023-12-10
+
+* Add class to prompt SDXL on Replicate
+  * looks like midlibrary prompts work in regular SDXL too
+
 ## 2023-12-2 and 2023-12-3
 
 * Use midjourney to generate images
+  * SDXL lora was not showing people
+    * prompt too long?
+    * catastrophic forgetting
+  * SDXL has lots of wierd artifacts
+    * we can address this by adding a human in the loop
+  * As we get preference data, we can use the stories to generate SDXL Loras specific
+    to each style we are intersted in.
   * https://midlibrary.io/ has a list of prompts to get specific artists and sytles
   * TODO: pick one or styles corresponding to each tone and maybe story type
+
+* Next steps:
+  * store generated stories in mongodb instead of S3
+  * use a flask app to get started.  Maybe use Google free tier to serve it, or 
 
 * Add story-viz
   * show the images plus prompts
@@ -28,8 +44,6 @@
       * read the story to the kid
     * share your stories with the community
       * popular stories give reinforcement to story quality
-    
-
 
 ## 2023-11-24 and 2023-11-25
 

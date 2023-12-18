@@ -7,6 +7,7 @@ import time
 import uuid
 
 import object_store_client
+import replicate
 
 
 class NextLegClient:
@@ -32,7 +33,7 @@ class NextLegClient:
 
         if image_response_data.get("progress") == 100:
             return image_response_data
-
+        
         if image_response_data.get("progress") == "incomplete":
             raise Exception("Image generation failed")
 
@@ -51,9 +52,9 @@ class NextLegClient:
         return self._fetch_to_completion(message_id, ppu_id, retry_count + 1)
 
     def _check_for_errors(self, response_data):
-        content = response_data.get("content", "")
-        for error_code, description in NextLegException.error_descriptions.items():
-            if error_code in content:
+        text = response_data.get("text", "")
+        for error_code in NextLegException.error_descriptions:
+            if error_code in text:
                 raise NextLegException(error_code)
 
     def generate_image(self, prompt):
@@ -88,16 +89,7 @@ class NextLegClient:
         # Extract and return the array of image URLs
         image_urls = completed_image_data.get("response", {}).get("imageUrls", [])
         if image_urls and isinstance(image_urls, list):
-            client = object_store_client.Boto3Client()
-            generation_id = uuid.uuid4()
-            return [
-                construct_image_url(
-                    client.upload_from_url(
-                        image_url, "botos-generated-images", f"generated-images/{generation_id}"
-                    )
-                )
-                for image_url in image_urls 
-            ]
+            return copy_images_to_s3(image_urls)
         else:
             raise Exception("No image URLs found in the response")
 
@@ -161,7 +153,6 @@ class DalleClient:
         return openai.Image.create(prompt=prompt, n=1, size="1024x1024")["data"][0][
             "url"
         ]
-
 
 class StableDiffusionClient:
     def __init__(self, beam_api_key, bucket_id, user_id, beam_api_id="a066e92232b30d96e03f924643e6df42"):
@@ -271,6 +262,77 @@ class StableDiffusionClient:
                 "error": f"Failed to generate image. Status code: {response.status_code} Response: {response.text}",
             } ]
 
+class ReplicateClient:
+    def __init__(self, model_name, image_count=4):
+        self.models = {
+            "sdxl": {
+                "id": "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+                "parameters": {
+                    "width": 1024,
+                    "height": 1024,
+                    "refine": "expert_ensemble_refiner",
+                    "scheduler": "K_EULER",
+                    "lora_scale": 0.6,
+                    "num_outputs": image_count,
+                    "guidance_scale": 7.5,
+                    "apply_watermark": False,
+                    "high_noise_frac": 0.8,
+                    "prompt_strength": 0.8,
+                    "num_inference_steps": 25
+                
+                },
+                "supports_multiple": True,
+            },
+            "playground-v2": {
+                "id": "lucataco/playground-v2:6c309de0b6ef3a66502204ff2ffab0c0a9757b30498ef99b9886b79b0046f3ca",
+                "parameters": {
+                    "width": 1024,
+                    "height": 1024,
+                    "scheduler": "K_EULER_ANCESTRAL",
+                    "guidance_scale": 3,
+                    "playground_model": "playground-v2-1024px-aesthetic",
+                    "num_inference_steps": 50,
+                    "num_outputs": 4,
+                },
+                "supports_multiple": False,
+            }
+        }
+        self.model_name = model_name
+        self.image_count = image_count
+
+    def generate_image(self, prompt, negative_prompt=""):
+
+        model = self.models[self.model_name].copy()
+        model["parameters"]["prompt"] = prompt
+        model["parameters"]["negative_prompt"] = negative_prompt
+
+        if self.models[self.model_name]["supports_multiple"]:
+            image_urls = replicate.run(
+                model["id"],
+                input=model["parameters"]
+            )
+        else:
+            image_urls = [
+                replicate.run(
+                    model["id"],
+                    input=model["parameters"]
+                )[0]
+                for _ in range(self.image_count)
+            ]
+
+        return copy_images_to_s3(image_urls)
+
+def copy_images_to_s3(image_urls):
+    client = object_store_client.Boto3Client()
+    generation_id = uuid.uuid4()
+    return [
+        construct_image_url(
+            client.upload_from_url(
+                image_url, "botos-generated-images", f"generated-images/{generation_id}", id
+            )
+        )
+        for id, image_url in enumerate(image_urls)
+    ]
 
 def construct_image_url(object_key):
     return f"https://www.storytime.glass/{object_key}"
@@ -283,10 +345,13 @@ def generate_image_with_client(client_type, prompt):
     elif client_type == 'dalle':
         openai_api_token = os.environ.get("OPENAI_API_TOKEN")
         client = DalleClient(openai_api_token)
-    elif client_type == 'sd':
-        # beam_api_token = os.environ.get("BEAM_API_KEY")
+    elif client_type == 'watercolor_lora':
         beam_api_token = os.environ.get("BEAM_SECRET_KEY_UUENCODED")
         client = StableDiffusionClient(beam_api_token, "botos-generated-images", "dev-test-user")
+    elif client_type == 'sdxl':
+        client = ReplicateClient("sdxl")
+    elif client_type == 'playground':
+        client = ReplicateClient("playground-v2")
     else:
         raise ValueError("Invalid client type specified. Choose 'nextleg' or 'dalle'.")
     
@@ -296,8 +361,13 @@ def generate_image_with_client(client_type, prompt):
 def main():
     parser = argparse.ArgumentParser(description='Generate images using Dalle or NextLeg clients.')
     parser.add_argument('prompt', type=str, help='The prompt to generate an image for.')
-    parser.add_argument('--client', type=str, choices=['nextleg', 'dalle', 'sd'], required=True,
-                        help='The image generation client to use.')
+    parser.add_argument(
+        '--client',
+        type=str,
+        choices=['nextleg', 'dalle', 'watercolor_lora', "sdxl", "playground"],
+        required=True,
+        help='The image generation client to use.'
+    )
     
     args = parser.parse_args()
     
