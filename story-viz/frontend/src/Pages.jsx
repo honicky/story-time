@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './Pages.module.css';
 import { useError } from './ErrorContext';
+import { postSelections } from './api';
 
 const Pages = ({ pages, selections, storyId }) => {
   const [selectedImages, setSelectedImages] = useState([]);
@@ -36,17 +37,10 @@ const Pages = ({ pages, selections, storyId }) => {
       setError('Invalid payload: Each selection must be a valid integer within the range of image URLs for its respective page.');
       return;
     }
-  
-    const payload = {
-      page_selections: selectedImages
-    };
-  
     try {
-      await axios.post(`https://81rq7.apps.beam.cloud/story/${storyId}/selections`, payload);
-      setError('')
+      await postSelections(storyId, selectedImages);
     } catch (error) {
       setError('Error posting selections:', error);
-      // Handle error response here, e.g., showing an error message
     }
   };
 

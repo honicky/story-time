@@ -1,5 +1,11 @@
 # Logbook
 
+## 2023-12-20
+
+* Store generated stories in MongoDb
+* Create a story-viz tool to select images for the story and publish them
+  * will also allow us to change prompts, regenerate, etc 
+
 ## 2023-12-10
 
 * Add class to prompt SDXL on Replicate

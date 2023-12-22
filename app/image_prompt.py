@@ -19,7 +19,7 @@ class NextLegClient:
             "Authorization": f"Bearer {self.auth_token}",
             "Content-Type": "application/json",
         }
-        self.max_retries = 20
+        self.max_retries = 50
         self.retry_delay = 5000  # Initial delay in milliseconds
 
     def _sleep(self, milliseconds):
@@ -62,7 +62,7 @@ class NextLegClient:
             f"{self.ppu_url}/imagine",
             headers=self.headers,
             json={
-                "msg": f"{prompt}. --relax"
+                "msg": f"{prompt} --relax --v 6"
             },
             timeout=120,
         )
