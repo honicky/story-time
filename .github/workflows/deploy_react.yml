@@ -25,7 +25,7 @@ jobs:
 
       - name: Build
         working-directory: react_slideshow
-        run: npm run build
+        run: npm run ${{ github.ref == 'refs/heads/master' && 'build' || 'build_staging' }}
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
@@ -37,3 +37,12 @@ jobs:
           SOURCE_DIR: "react_slideshow/build"
           DEST_DIR: ${{ github.ref == 'refs/heads/master' && '' || 'staging' }}
         if: success()
+
+      - name: Invalidate CloudFront
+        uses: chetan/invalidate-cloudfront-action@v2
+        env:
+          DISTRIBUTION: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION }}
+          PATHS: "/${{ github.ref == 'refs/heads/master' && '' || 'staging/' }}static/* /${{ github.ref == 'refs/heads/master' && '' || 'staging/' }}*.html /${{ github.ref == 'refs/heads/master' && '' || 'staging/' }}*.json /${{ github.ref == 'refs/heads/master' && '' || 'staging/' }}*.txt /${{ github.ref == 'refs/heads/master' && '' || 'staging/' }}*.png"
+          AWS_REGION: "us-east-1"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

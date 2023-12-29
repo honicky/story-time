@@ -22,7 +22,6 @@ app = App(
             ],
         ),
     ),
-    # volumes=[Volume(name="models", path="./models")],
 )
 
 def create_sdxl_payload(prompt, bucket_id, object_key):

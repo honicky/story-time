@@ -1,5 +1,45 @@
 # Logbook
 
+## Ideas
+
+  * Get feedback from user
+    * like a story - add it to my library
+    * share stories with other users
+    * popular stories
+    * dislike or flag an image
+  * Create hardcopies with integration to on-demand publishers
+    * Author gets a cut of revenue
+  * Artists can participate by providing art to fine tune on
+    * they get a cut of revenue from stories that generate revenue / views
+  * Artists can create art work for a popular story
+    * I will create art work if X number of people pre-purchase
+  * app that can build a story interactively
+    * allow them to prompt for changes to the story
+    * allow them to regenerate images (similar to story viz)
+    * share your stories with the community
+      * popular stories give reinforcement to story quality
+  * interactive app
+    * read the story to the kid
+    * watch the camera and interact via voice
+    * notice when new people are there, have a coversation with them
+    * co-create a story live
+
+## 2023-12-28
+* fixed the beam_api.py:handler:publish endpoint to correctly decode and push
+`latest_story.json`
+
+## 2023-12-27
+
+* added `beam_wrapper.sh` script to `story-viz/backend` because `beam` doesn't play nice with
+  symlinks.  This script sync the `lib` directory to inside of the beam app. Add it to .gitignore
+* backend now successfully deploys
+* Updated frontend to read from the user's latest_story.json file
+* Updated frontend layout to include the text of the story on the right side of the page
+
+## 2023-12-22
+
+* create a `staging` branch that we can use to try out new versions of the slideshow
+
 ## 2023-12-20
 
 * Store generated stories in MongoDb

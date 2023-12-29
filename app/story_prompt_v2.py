@@ -122,12 +122,12 @@ def store_story_in_mongo(story_descriptor):
     return story_id
 
 try:
-    next_leg_token = os.environ.get("THE_NEXT_LEG_API_TOKEN")
-    image_client = image_prompt.NextLegClient(next_leg_token)
+    # next_leg_token = os.environ.get("THE_NEXT_LEG_API_TOKEN")
+    # image_client = image_prompt.NextLegClient(next_leg_token)
     # dalle_client = DalleClient(openai_api_token)
     # beam_api_token = os.environ.get("BEAM_SECRET_KEY_UUENCODED")
     # image_client = image_prompt.StableDiffusionClient(beam_api_token, "botos-generated-images", "dev-test-user")
-    # image_client = image_prompt.ReplicateClient("sdxl")
+    image_client = image_prompt.ReplicateClient("sdxl")
 
     def generate_image(prompt):
         print(f"Generating image for prompt: {prompt} ...", end="", flush=True )
