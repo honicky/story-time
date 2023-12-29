@@ -35,7 +35,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
           SOURCE_DIR: "react_slideshow/build"
-          DEST_DIR: ${{ github.ref == 'refs/heads/master' && '/' || '/staging' }}
+          DEST_DIR: ${{ github.ref == 'refs/heads/staging' && 'staging' || '' }}
         if: success()
 
       - name: Invalidate CloudFront
