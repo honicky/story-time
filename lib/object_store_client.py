@@ -45,6 +45,10 @@ class Boto3Client:
             print(f"Failed to download file from {url}")
             return None
 
+    def get_object(self, bucket_name: str, key: str) -> bytes:
+        s3_client = self.boto3_client.resource("s3").Bucket(bucket_name)
+        return s3_client.Object(key).get()["Body"].read()
+
 
 def insert_image_id(url, id):
     base, suffix = url.rsplit('.', 1)

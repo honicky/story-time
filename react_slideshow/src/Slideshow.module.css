@@ -1,0 +1,31 @@
+.slideshow-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+.image-container {
+  flex: 1 1 auto; /* Allow the container to grow and shrink as needed */
+  height: 99.5vh; /* Full height of the viewport */
+  padding: .2%;
+}
+
+.image-container img {
+  height: 99.5vh; /* Full height of the viewport */
+  object-fit: contain; /* Maintain aspect ratio of the image */
+}
+
+.text-container {
+  flex-grow: 1; /* This will take up the remaining space */
+  overflow-y: auto; /* This will add a scrollbar if the text is longer than the container */
+  display: flex;
+  align-items: center; /* Vertically center the text */
+  justify-content: flex-start; /* Align content to the start (left) */
+  text-align: left; /* Text aligned to the left */
+  padding: 20px;
+  height: 100%;
+  font-size: 20pt; /* Set your desired font size */
+  line-height: 1.7; /* 1.5 line spacing */
+  overflow-y: auto; /* Allows scrolling if text is longer than the container */
+  color: #333
+}

@@ -49,7 +49,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/:storyId" element={<ErrorProvider><Story /></ErrorProvider>} />
+        <Route path="/:storyId?" element={<ErrorProvider><Story /></ErrorProvider>} />
       </Routes>
     </Router>
   );
