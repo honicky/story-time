@@ -1,80 +1,48 @@
 import axios from "axios";
 import React, { useEffect, useState } from 'react';
 import {
-  HashRouter,
+  HashRouter as Router,
   Route,
   Routes,
-  useLocation,
+  useParams,
 } from 'react-router-dom';
 import Slideshow from './Slideshow';
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
-
-// const SlideshowWrapper = ({ jsonUrl, interval }) => {
-//   const [pages, setPages] = useState([]);
-
-//   useEffect(() => {
-//     if (jsonUrl) {
-//       axios.get(jsonUrl).then((response) => {
-//         setPages(response.data.pages);
-//       });
-//     }
-//   }, [jsonUrl]);
-
-//   return <Slideshow pages={pages} interval={interval} />;
-// };
-
-
-const SlideshowWrapper = () => {
+const SlideshowWrapper = ({ interval }) => {
   const [story, setStory] = useState({});
-  const [storyUrl, setStoryUrl] = useState('');
-  const [interval, setInterval] = useState(5);
-  const query = useQuery();
+  const { userId = 'dev-test-user' } = useParams();  // Default userId if not provided
 
   useEffect(() => {
-    const storyUrlParam = query.get('story_url');
-    if (storyUrlParam) {
-      setStoryUrl(storyUrlParam);
-    }
+    const latestStoryUrl = `/${userId}/latest_story.json`;
 
-    const intervalParam = query.get('interval');
-    if (intervalParam) {
-      setInterval(parseInt(intervalParam));
-    }
-  }, [query]);
-
-  useEffect(() => {
-    if (storyUrl) {
-      axios.get(storyUrl).then((response) => {
-        setStory(response.data);
-      });
-    }
-  }, [storyUrl]);
+    axios.get(latestStoryUrl).then(response => {
+      const storyUrls = response.data;
+      if (storyUrls.length > 0) {
+        axios.get(`/${storyUrls[0]}`).then(response => {
+          setStory(response.data);
+        });
+      }
+    });
+  }, [userId]);
 
   return <Slideshow story={story} interval={interval} />;
 };
 
 const App = () => {
   return (
-    <HashRouter>
+    <Router>
       <Routes>
-        <Route path="/" element={<SlideshowPage />} />
+        <Route path="/slideshow/:userId" element={<SlideshowPage />} />
+        <Route path="/" element={<SlideshowPage />} /> {/* Route without userId */}
       </Routes>
-    </HashRouter>
+    </Router>
   );
 };
 
 const SlideshowPage = () => {
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
+  const interval = 5; // Default to 5 seconds, or get it from query if needed
 
-  const jsonUrl = query.get('jsonUrl');
-  const interval = parseInt(query.get('interval')) || 5; // Default to 5 seconds
-
-  return <SlideshowWrapper jsonUrl={jsonUrl} interval={interval} />;
+  return <SlideshowWrapper interval={interval} />;
 };
 
 export default App;
-

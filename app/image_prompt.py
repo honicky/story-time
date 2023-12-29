@@ -19,7 +19,7 @@ class NextLegClient:
             "Authorization": f"Bearer {self.auth_token}",
             "Content-Type": "application/json",
         }
-        self.max_retries = 50
+        self.max_retries = 100
         self.retry_delay = 5000  # Initial delay in milliseconds
 
     def _sleep(self, milliseconds):

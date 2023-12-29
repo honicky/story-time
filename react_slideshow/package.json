@@ -2,7 +2,7 @@
   "name": "react_slideshow",
   "version": "0.1.0",
   "private": true,
-  "proxy":  "http://botos-generated-images.s3-website-us-east-1.amazonaws.com",
+  "proxy":  "https://www.storytime.glass",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -17,6 +17,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build_staging": "PUBLIC_URL=https://www.storytime.glass/staging/ react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
