@@ -18,7 +18,7 @@ from pymongo.server_api import ServerApi
 from lib import object_store_client
 
 app = App(
-    name="story-viz",
+    name=f"story-viz{'-' + os.environ['STAGE'] if 'STAGE' in os.environ else ''}",
     runtime=Runtime(
         cpu=1,
         memory="128Mi",
@@ -44,7 +44,6 @@ def handler():
     
     @api.get("/ping")
     def ping(): 
-
         mongo_client.admin.command('ping')
         return "Pinged your deployment. You successfully connected to MongoDB!"
 
@@ -55,8 +54,8 @@ def handler():
 
     @api.get("/story/")
     def get_stories():
-        stories = mongo_client.story_time.stories.find({}, {"_id": 1})
-        return [str(oid["_id"]) for oid in stories]
+        stories = mongo_client.story_time.stories.find()
+        return mongodb_json_response(list(stories))
 
     class Selection(BaseModel):
         page_selections: List[int]
@@ -114,8 +113,7 @@ def handler():
         publish a story by taking the latest image selection for the story and removing all of the
         other selections, and then writing the story to the "botos-generated-images" S3 bucket under
         the provided username
-        '''
-    
+        '''   
         
         # Retrieve the story to get the number of images per page
         story = mongo_client.story_time.stories.find_one({"_id": ObjectId(story_id)})

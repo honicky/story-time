@@ -3,6 +3,7 @@ import axios from 'axios';
 import { HashRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 import Metadata from './Metadata';
 import Pages from './Pages';
+import StoryList from './StoryList';
 import { fetchSelectionsData, fetchStoryData } from './api';
 import { ErrorProvider, useError } from './ErrorContext';
 
@@ -49,7 +50,8 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/:storyId?" element={<ErrorProvider><Story /></ErrorProvider>} />
+        <Route path="/" element={<ErrorProvider><StoryList /></ErrorProvider>} />
+        <Route path="/:storyId" element={<ErrorProvider><Story /></ErrorProvider>} />
       </Routes>
     </Router>
   );
