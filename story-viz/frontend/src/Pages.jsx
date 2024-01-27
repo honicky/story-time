@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import styles from './Pages.module.css';
 import { useError } from './ErrorContext';
 import { postSelections } from './api';
+import { useToken } from './TokenContext';
+import { useNavigate } from 'react-router-dom'; // or useNavigate in React Router v6
 
 const Pages = ({ pages, selections, storyId }) => {
   const [selectedImages, setSelectedImages] = useState([]);
 
   const { setError } = useError();
+  const { token } = useToken();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (selections && selections.length > 0) {
@@ -38,7 +41,8 @@ const Pages = ({ pages, selections, storyId }) => {
       return;
     }
     try {
-      await postSelections(storyId, selectedImages);
+      await postSelections(storyId, selectedImages, token);
+      navigate("/");
     } catch (error) {
       setError('Error posting selections:', error);
     }

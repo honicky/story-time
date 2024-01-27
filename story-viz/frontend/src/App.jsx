@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { HashRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import Login from './Login'
 import Metadata from './Metadata';
 import Pages from './Pages';
+import StoryList from './StoryList';
 import { fetchSelectionsData, fetchStoryData } from './api';
-import { ErrorProvider, useError } from './ErrorContext';
-
+import { useError } from './ErrorContext';
+import { useToken } from './TokenContext';
 import ErrorMessage from './ErrorMessage';
 
 const Story = () => {
@@ -15,12 +16,13 @@ const Story = () => {
   const storyUrl = `https://81rq7.apps.beam.cloud/story/${storyId}`;
 
   const { setError } = useError();
+  const { token } = useToken();
 
   useEffect(() => {
     if (storyId) {
         Promise.all([
-          fetchStoryData(storyId),
-          fetchSelectionsData(storyId),
+          fetchStoryData(storyId, token),
+          fetchSelectionsData(storyId, token),
         ]).then(([storyData, selectionsData]) => {
           setData(storyData);
           setSelections(selectionsData);
@@ -46,10 +48,25 @@ const Story = () => {
 };
 
 const App = () => {
+
+  const { token } = useToken();
+
+  // TODO: handle expired tokens
+  if(!token) {
+    return (
+        <Login />
+    )
+  }
+
   return (
     <Router>
       <Routes>
-        <Route path="/:storyId?" element={<ErrorProvider><Story /></ErrorProvider>} />
+        <Route path="/" element={
+            <StoryList />
+        } />
+        <Route path="/story/:storyId" element={
+            <Story />
+        } />
       </Routes>
     </Router>
   );
