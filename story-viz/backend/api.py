@@ -23,19 +23,6 @@ from lib import object_store_client
 
 load_dotenv()  # take environment variables from .env if they exist
 
-# app = App(
-#     name=f"story-viz{'-' + os.environ['STAGE'] if 'STAGE' in os.environ else ''}",
-#     runtime=Runtime(
-#         cpu=1,
-#         memory="128Mi",
-#         gpu="",
-#         image=Image(
-#             python_packages=["boto3", "bson", "passlib[bcrypt]", "pyjwt", "pymongo[srv]" ],
-#         )
-
-#     ),
-# )
-
 mongodb_password = os.environ['MONGODB_STORY_TIME_EDITOR_PASSWORD']
 mongo_uri = f"mongodb+srv://story_time_editor:{mongodb_password}@freecluster.wk9cvp6.mongodb.net/?retryWrites=true&w=majority"
 
