@@ -1,14 +1,17 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import argparse
 import json
 import os
-import openai
+from openai import OpenAI
 import requests
 import time
 import uuid
 
+
 import object_store_client
 import replicate
-
 
 class NextLegClient:
     def __init__(self, auth_token, base_url="https://api.thenextleg.io"):
@@ -147,10 +150,10 @@ class NextLegException(Exception):
 
 class DalleClient:
     def __init__(self, openai_api_key):
-        openai.api_key = openai_api_key
+        self.client = OpenAI(api_key=openai_api_key)
 
     def generate_image(self, prompt):
-        return openai.Image.create(prompt=prompt, n=1, size="1024x1024")["data"][0][
+        return self.client.images.generate(prompt=prompt, n=1, size="1024x1024")["data"][0][
             "url"
         ]
 

@@ -24,6 +24,13 @@
     * notice when new people are there, have a coversation with them
     * co-create a story live
 
+## 2023-01-23 to 2023-01-25
+
+* move story-viz to standalone fastapi, for deployment to google app engine
+* add JWT authentication
+* add .env files for local development outside of code spaces
+* update openapi version to 1.0
+
 ## 2023-12-28
 * fixed the beam_api.py:handler:publish endpoint to correctly decode and push
 `latest_story.json`

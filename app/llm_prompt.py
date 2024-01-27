@@ -1,6 +1,8 @@
+from dotenv import load_dotenv
 
-import openai
+load_dotenv()
 
+from openai import OpenAI
 from util import current_time_ms
 from wandb.sdk.data_types.trace_tree import Trace
 
@@ -8,6 +10,8 @@ class GTP4LLM:
     def __init__(self, api_token) -> None:
         self.reset_history()
         self.api_token = api_token
+        self.client = OpenAI(api_key=self.api_token)
+
 
     def reset_history(self) -> None:
         self.chat_history = [ 
@@ -19,23 +23,19 @@ class GTP4LLM:
         self.chat_history.append({"role": "user", "content": prompt})
 
         # Call the GPT-4 model
-        openai.api_key = self.api_token
         # model_name = "gpt-4"
         # model_name = "gpt-4-1106-preview"
         start_time = current_time_ms()
 
         try:
-            response = openai.ChatCompletion.create(
-                model=model_name,
-                messages=self.chat_history,
-                # functions=functions,
-            )
+            response = self.client.chat.completions.create(model=model_name,
+            messages=self.chat_history)
 
             end_time = current_time_ms()
             status = "success"
             status_message = "Success"
-            response_text = response["choices"][0]["message"]["content"]
-            token_usage = response["usage"].to_dict()
+            response_text = response.choices[0].message.content
+            token_usage = response.usage
 
         except Exception as e:
             end_time = current_time_ms()
