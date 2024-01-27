@@ -10,7 +10,7 @@ import Slideshow from './Slideshow';
 
 const SlideshowWrapper = ({ interval }) => {
   const [story, setStory] = useState({});
-  const { userId = 'dev-test-user' } = useParams();  // Default userId if not provided
+  const { userId = 'rj' } = useParams();  // Default userId if not provided
 
   useEffect(() => {
     const latestStoryUrl = `/${userId}/latest_story.json`;
@@ -40,7 +40,7 @@ const App = () => {
 };
 
 const SlideshowPage = () => {
-  const interval = 5; // Default to 5 seconds, or get it from query if needed
+  const interval = 600; // Default to 5 seconds, or get it from query if needed
 
   return <SlideshowWrapper interval={interval} />;
 };

@@ -1,10 +1,11 @@
-
+from dotenv import load_dotenv
 import os
 import openai
 import json
 import random
 import re
 
+load_dotenv()
 
 from story_config import story_config
 from util import current_time_ms, url_to_pil_image
