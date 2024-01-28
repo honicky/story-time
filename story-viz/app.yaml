@@ -1,0 +1,21 @@
+runtime: python39
+
+entrypoint: gunicorn -k uvicorn.workers.UvicornWorker backend.api:api
+
+handlers:
+  # FastAPI routes under /api
+  - url: (/api/.*|/docs|/openapi.json)
+    script: auto
+
+  # Serve React static files from the build folder
+  # - url: /(.*\.(json|ico|js|css|png|jpg|jpeg|svg))$
+  - url: /
+    static_dir: frontend/dist/
+    # upload: frontend/build/(.*\.(json|ico|js|css|png|jpg|jpeg|svg))$
+
+  # Serve React index.html for all non-API routes
+  - url: /(.*)
+    static_files: frontend/dist/index.html
+    upload: frontend/dist/index.html
+
+

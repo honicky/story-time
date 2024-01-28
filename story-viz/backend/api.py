@@ -19,7 +19,7 @@ from pymongo.collection import ReturnDocument
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
-from lib import object_store_client
+from .lib import object_store_client
 
 load_dotenv()  # take environment variables from .env if they exist
 
@@ -57,11 +57,9 @@ class Token(BaseModel):
     token_type: str
 
 def verify_password(plain_password, hashed_password):
-    print(f"{plain_password}, {hashed_password}")
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_user(db, username: str):
-    print(f"{username}, {db}")
     if username in db:
         user_dict = db[username]
         return UserInDB(**user_dict)

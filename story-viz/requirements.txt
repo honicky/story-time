@@ -1,0 +1,10 @@
+boto3
+fastapi
+gunicorn
+python-dotenv
+passlib[bcrypt]
+pyjwt
+pymongo[srv]
+python-multipart
+requests
+uvicorn
