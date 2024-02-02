@@ -9,6 +9,8 @@ on:
 env:
   STAGING_WORKLOAD_IDENTITY_PROVIDER: "projects/824768863461/locations/global/workloadIdentityPools/github/providers/botos"
   PRODUCTION_WORKLOAD_IDENTITY_PROVIDER: "projects/722541659860/locations/global/workloadIdentityPools/github/providers/botos"
+  GCP_PROJECT_ID: ${{ github.ref == 'refs/heads/master' && vars.GCP_PROJECT_ID_PROD || vars.GCP_PROJECT_ID_STAGING }}
+
 jobs:
   deploy:
     # Add "id-token" with the intended permissions.
@@ -45,13 +47,16 @@ jobs:
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:
-          project_id: ${{ github.ref == 'refs/heads/master' && vars.GCP_PROJECT_ID_PROD || vars.GCP_PROJECT_ID_STAGING }}
+          project_id: ${{ GCP_PROJECT_ID }}
           workload_identity_provider: ${{ github.ref == 'refs/heads/master' && env.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER || env.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
         with:
           version: '>= 363.0.0'
+
+      - name: Output App Engine info
+        run: gcloud app describe --project ${{ GCP_PROJECT_ID }}
 
       - name: Deploy to Google App Engine
         working-directory: story-viz
