@@ -47,7 +47,7 @@ jobs:
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:
-          service_account: ${{ env.GCP_PROJECT_ID }}@appspot.gserviceaccount.com
+          service_account: cicd-service-account@${{ env.GCP_PROJECT_ID }}.iam.gserviceaccount.com
           workload_identity_provider: ${{ github.ref == 'refs/heads/master' && env.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER || env.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
 
       - name: 'Set up Cloud SDK'
