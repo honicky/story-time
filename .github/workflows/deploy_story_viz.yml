@@ -8,9 +8,7 @@ on:
 
 env:
   STAGING_WORKLOAD_IDENTITY_PROVIDER: "projects/824768863461/locations/global/workloadIdentityPools/github/providers/botos"
-  PRODUCTION_WORKLOAD_IDENTITY_PROVIDER: projects/722541659860/locations/global/workloadIdentityPools/github/providers/botos
-  WORKLOAD_IDENTITY_PROVIDER: ${{ github.ref == 'refs/heads/master' && env.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER || env.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
-
+  PRODUCTION_WORKLOAD_IDENTITY_PROVIDER: "projects/722541659860/locations/global/workloadIdentityPools/github/providers/botos"
 jobs:
   deploy:
     # Add "id-token" with the intended permissions.
@@ -47,7 +45,7 @@ jobs:
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:
-          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER}}
+          workload_identity_provider: ${{ github.ref == 'refs/heads/master' && env.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER || env.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
       - name: 'Set up Cloud SDK'
