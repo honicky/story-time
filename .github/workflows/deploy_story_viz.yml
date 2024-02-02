@@ -1,0 +1,59 @@
+name: Deploy story-viz to Google App Engine
+
+on:
+  push:
+    branches:
+      - master
+      - staging
+
+env:
+  STAGING_WORKLOAD_IDENTITY_PROVIDER: "projects/824768863461/locations/global/workloadIdentityPools/github/providers/botos"
+  PRODUCTION_WORKLOAD_IDENTITY_PROVIDER: projects/722541659860/locations/global/workloadIdentityPools/github/providers/botos
+  WORKLOAD_IDENTITY_PROVIDER: ${{ github.ref == 'refs/heads/master' && env.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER || env.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
+
+jobs:
+  deploy:
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output Environment
+        run: env
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install NPM dependencies
+        working-directory: story-viz/frontend
+        run: npm install
+
+      - name: Build NPM
+        working-directory: story-viz/frontend
+        run: npm run build
+
+      - name: Install Python Dependencies
+        working-directory: story-viz
+        run: |
+          pip install -r requirements.txt
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER}}
+          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
+
+      - name: Deploy to Google App Engine
+        run: gcloud app deploy app.yaml --quiet
