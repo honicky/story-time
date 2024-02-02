@@ -8,10 +8,8 @@ handlers:
     script: auto
 
   # Serve React static files from the build folder
-  # - url: /(.*\.(json|ico|js|css|png|jpg|jpeg|svg))$
   - url: /
     static_dir: frontend/dist/
-    # upload: frontend/build/(.*\.(json|ico|js|css|png|jpg|jpeg|svg))$
 
   # Serve React index.html for all non-API routes
   - url: /(.*)
