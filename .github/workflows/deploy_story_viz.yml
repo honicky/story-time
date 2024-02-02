@@ -47,7 +47,7 @@ jobs:
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:
-          project_id: ${{ GCP_PROJECT_ID }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ github.ref == 'refs/heads/master' && env.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER || env.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
 
       - name: 'Set up Cloud SDK'
@@ -56,7 +56,7 @@ jobs:
           version: '>= 363.0.0'
 
       - name: Output App Engine info
-        run: gcloud app describe --project ${{ GCP_PROJECT_ID }}
+        run: gcloud app describe --project ${{ env.GCP_PROJECT_ID }}
 
       - name: Deploy to Google App Engine
         working-directory: story-viz
