@@ -55,6 +55,9 @@ jobs:
         with:
           version: '>= 363.0.0'
 
+      - name: Output Cloud Storage buckets for IAM validation
+        run: gcloud storage buckets list --project ${{ env.GCP_PROJECT_ID }}
+  
       - name: Output App Engine info
         run: gcloud app describe --project ${{ env.GCP_PROJECT_ID }}
 
