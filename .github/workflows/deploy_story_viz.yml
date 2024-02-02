@@ -45,8 +45,8 @@ jobs:
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:
+          project_id: ${{ github.ref == 'refs/heads/master' && vars.GCP_PROJECT_ID_PROD || vars.GCP_PROJECT_ID_STAGING }}
           workload_identity_provider: ${{ github.ref == 'refs/heads/master' && env.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER || env.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
