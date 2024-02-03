@@ -44,7 +44,7 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Install Python Dependencies
+      - name: Copy python lib directory
         working-directory: story-viz/backend
         run: ./copy_lib.sh
   
