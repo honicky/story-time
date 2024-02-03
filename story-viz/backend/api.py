@@ -5,7 +5,6 @@ import boto3
 from botocore.exceptions import ClientError
 from bson.objectid import ObjectId
 from bson.json_util import dumps as bson_dumps
-from dotenv import load_dotenv
 import json
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, Request, status
@@ -19,9 +18,9 @@ from pymongo.collection import ReturnDocument
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
+from .secrets import setup_environment_variables
+setup_environment_variables()
 from .lib import object_store_client
-
-load_dotenv()  # take environment variables from .env if they exist
 
 mongodb_password = os.environ['MONGODB_STORY_TIME_EDITOR_PASSWORD']
 mongo_uri = f"mongodb+srv://story_time_editor:{mongodb_password}@freecluster.wk9cvp6.mongodb.net/?retryWrites=true&w=majority"
