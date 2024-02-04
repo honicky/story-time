@@ -1,0 +1,11 @@
+boto3
+fastapi
+google-cloud-secret-manager
+gunicorn
+python-dotenv
+passlib[bcrypt]
+pyjwt
+pymongo[srv]
+python-multipart
+requests
+uvicorn

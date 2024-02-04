@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 import Login from './Login'
 import Metadata from './Metadata';
 import Pages from './Pages';

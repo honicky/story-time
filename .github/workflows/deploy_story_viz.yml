@@ -1,0 +1,70 @@
+name: Deploy story-viz to Google App Engine
+
+on:
+  push:
+    branches:
+      - master
+      - staging
+
+env:
+  STAGING_WORKLOAD_IDENTITY_PROVIDER: "projects/824768863461/locations/global/workloadIdentityPools/github/providers/botos"
+  PRODUCTION_WORKLOAD_IDENTITY_PROVIDER: "projects/722541659860/locations/global/workloadIdentityPools/github/providers/botos"
+  GCP_PROJECT_ID: ${{ github.ref == 'refs/heads/master' && vars.GCP_PROJECT_ID_PROD || vars.GCP_PROJECT_ID_STAGING }}
+
+jobs:
+  deploy:
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output Environment
+        run: env
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 21.6.0
+
+      - name: Install NPM dependencies
+        working-directory: story-viz/frontend
+        run: npm install
+
+      - name: Build NPM
+        working-directory: story-viz/frontend
+        run: npm run build
+
+      - name: Install Python Dependencies
+        working-directory: story-viz
+        run: |
+          pip install -r requirements.txt
+
+      - name: Copy python lib directory
+        working-directory: story-viz/backend
+        run: ./copy_lib.sh
+  
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          service_account: cicd-service-account@${{ env.GCP_PROJECT_ID }}.iam.gserviceaccount.com
+          workload_identity_provider: ${{ github.ref == 'refs/heads/master' && env.PRODUCTION_WORKLOAD_IDENTITY_PROVIDER || env.STAGING_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
+
+      - name: Output Cloud Storage buckets for IAM validation
+        run: gcloud storage buckets list --project ${{ env.GCP_PROJECT_ID }}
+  
+      - name: Output App Engine info
+        run: gcloud app describe --project ${{ env.GCP_PROJECT_ID }}
+
+      - name: Deploy to Google App Engine
+        working-directory: story-viz
+        run: gcloud app deploy app.yaml --project ${{ env.GCP_PROJECT_ID }}
