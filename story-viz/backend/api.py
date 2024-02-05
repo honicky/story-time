@@ -18,22 +18,10 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 from .secrets import setup_environment_variables
-<<<<<<< HEAD
 
 setup_environment_variables()
-
-mongodb_password = os.environ["MONGODB_STORY_TIME_EDITOR_PASSWORD"]
-mongo_uri = (
-    f"mongodb+srv://story_time_editor:{mongodb_password}@freecluster.wk9cvp6.mongodb.net/?retryWrites=true&w=majority"
-)
-=======
-
-setup_environment_variables()
-
->>>>>>> 844b38e (Add linting and testing for story-viz)
 
 mongodb_password = os.getenv("MONGODB_STORY_TIME_EDITOR_PASSWORD", "NO_PASSWORD_SET")
-
 mongo_uri = (
     f"mongodb+srv://story_time_editor:{mongodb_password}@freecluster.wk9cvp6.mongodb.net/?retryWrites=true&w=majority"
 )
