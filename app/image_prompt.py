@@ -153,9 +153,8 @@ class DalleClient:
         self.client = OpenAI(api_key=openai_api_key)
 
     def generate_image(self, prompt):
-        return self.client.images.generate(prompt=prompt, n=1, size="1024x1024")["data"][0][
-            "url"
-        ]
+        image_response = self.client.images.generate(model="dall-e-3", prompt=prompt, n=1, size="1024x1024")
+        return image_response.data[0].url
 
 class StableDiffusionClient:
     def __init__(self, beam_api_key, bucket_id, user_id, beam_api_id="a066e92232b30d96e03f924643e6df42"):

@@ -2,6 +2,8 @@ import boto3
 import mimetypes
 import os
 import requests
+from typing import Optional
+
 
 class Boto3Client:
     def __init__(self):
@@ -25,7 +27,13 @@ class Boto3Client:
         print(f"Uploading {key} with mime type {mime_type}")
         s3_client.put_object(Body=file_body, Key=key, ContentType=mime_type)
 
-    def upload_from_url(self, url: str, bucket_name: str, key_prefix: str, target_id: str = None) -> None:
+    def upload_from_url(
+        self,
+        url: str,
+        bucket_name: str,
+        key_prefix: str,
+        target_id: Optional[str] = None,
+    ) -> Optional[str]:
         # Get the file name from the URL
         file_name = os.path.basename(url)
         if target_id is not None:
@@ -51,5 +59,5 @@ class Boto3Client:
 
 
 def insert_image_id(url, id):
-    base, suffix = url.rsplit('.', 1)
+    base, suffix = url.rsplit(".", 1)
     return f"{base}-{id}.{suffix}"

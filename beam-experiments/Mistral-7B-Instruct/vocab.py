@@ -1,1 +1,1 @@
-../../lib/vocab.py
+../../story-viz/backend/lib/vocab.py
