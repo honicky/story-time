@@ -40,7 +40,7 @@ const App = () => {
 };
 
 const SlideshowPage = () => {
-  const interval = 600; // Default to 5 seconds, or get it from query if needed
+  const interval = 20; // Default to 20 seconds, or get it from query if needed
 
   return <SlideshowWrapper interval={interval} />;
 };
