@@ -44,9 +44,9 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Copy python lib directory
-        working-directory: story-viz/backend
-        run: ./copy_lib.sh
+      - name: Validate story-viz
+        run: |
+          python3 scripts/validate.py
   
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
