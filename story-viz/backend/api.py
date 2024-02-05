@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 import os
 from pymongo.collection import ReturnDocument
 from pymongo.mongo_client import MongoClient
@@ -19,6 +19,7 @@ from pymongo.server_api import ServerApi
 
 from .secrets import setup_environment_variables
 
+# Setup constants and environment variables
 setup_environment_variables()
 
 mongodb_password = os.getenv("MONGODB_STORY_TIME_EDITOR_PASSWORD", "NO_PASSWORD_SET")
@@ -30,6 +31,7 @@ jwt_secret_key = os.getenv("JWT_SECRET_KEY", "NO_SECRET_KEY_SET")
 JWT_ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
+# use a hard coded user database to get started. Eventually we can use OAUTH2
 hard_coded_users_db = {
     "rj": {
         "username": "rj",
@@ -39,44 +41,56 @@ hard_coded_users_db = {
 
 api = FastAPI()
 mongo_client: MongoClient = MongoClient(mongo_uri, server_api=ServerApi("1"))
-
-# JWT authentication
-
 pwd_context = CryptContext(schemes=["bcrypt"])
 
 
-# Pydantic models for user and token
 class User(BaseModel):
+    """
+    Base model for user data
+    """
+
     username: str
 
 
 class UserInDB(User):
+    """
+    User with password
+    """
+
     hashed_password: str
 
 
 class Token(BaseModel):
+    """
+    A token we receive from the login endpoint
+    """
+
     access_token: str
     token_type: str
 
 
-def verify_password(plain_password, hashed_password):
+def verify_password(plain_password, hashed_password) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def get_user(db, username: str):
+def get_user(db, username: str) -> Optional[UserInDB]:
     if username in db:
         user_dict = db[username]
         return UserInDB(**user_dict)
+    return None
 
 
-def authenticate_user(user_db, username: str, password: str):
+def authenticate_user(user_db, username: str, password: str) -> Optional[User]:
     user = get_user(user_db, username)
     if not user or not verify_password(password, user.hashed_password):
         return None
     return user
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: Dict, expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Create a JWT token using `data`
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -87,7 +101,10 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """
+    Extract the user from the token and return a corresponding User object
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -95,7 +112,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, jwt_secret_key, algorithms=[JWT_ALGORITHM])
-        username: Any | None = payload.get("sub")
+        username: Optional[str] = payload.get("sub")
         if username is None:
             raise credentials_exception
         user = get_user(hard_coded_users_db, username=username)
@@ -106,53 +123,58 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
 
 
-def mongodb_json_response(data):
+def mongodb_json_response(data) -> Response:
     return Response(content=bson_dumps(data), media_type="application/json")
 
 
 @api.get("/api/ping")
-def ping(current_user: User = Depends(get_current_user)):
+def ping(current_user: User = Depends(get_current_user)) -> str:
+    """
+    Ping the MongoDB deployment using the MongoDB client to verify that the backend is connected to MongoDB.
+    """
     mongo_client.admin.command("ping")
     return "Pinged your deployment. You successfully connected to MongoDB!"
 
 
 @api.get("/api/story/{story_id}")
-def get_story(story_id: str, current_user: User = Depends(get_current_user)):
+def get_story(story_id: str, current_user: User = Depends(get_current_user)) -> Response:
+    """
+    Retrieve a single story by ID
+    """
     story = mongo_client.story_time.stories.find_one({"_id": ObjectId(story_id)})
     return mongodb_json_response(story)
 
 
 @api.get("/api/story/")
-def get_stories(current_user: User = Depends(get_current_user)):
+def get_stories(current_user: User = Depends(get_current_user)) -> Response:
+    """
+    Retrieve all stories. Eventually this should be paginated, and should only be for the current user.
+    """
     stories = mongo_client.story_time.stories.find()
     return mongodb_json_response(list(stories))
 
 
 class Selection(BaseModel):
+    """
+    A selection of images to display for each page.  The length of this list should match the number of pages in the
+    story.
+    """
+
     page_selections: List[int]
 
 
 @api.post("/api/story/{story_id}/selections")
-def set_story_selections(story_id: str, selection: Selection, current_user: User = Depends(get_current_user)):
+def set_story_selections(
+    story_id: str, selection: Selection, current_user: User = Depends(get_current_user)
+) -> Response:
+    """
+    Set the image selections for a story.
+    """
     # Retrieve the story to get the number of images per page
-    story = mongo_client.story_time.stories.find_one({"_id": ObjectId(story_id)})
-    if not story:
-        raise HTTPException(status_code=404, detail="Story not found")
-    if "pages" not in story:
-        raise HTTPException(status_code=404, detail="Story does not contain pages")
+    maybe_story: Optional[Any] = mongo_client.story_time.stories.find_one({"_id": ObjectId(story_id)})
 
-    # Validate the selections
-    for page_index, image_index in enumerate(selection.page_selections):
-        if page_index < 0 or page_index >= len(story["pages"]):
-            raise HTTPException(status_code=400, detail=f"Invalid page index: {page_index}")
-        if image_index < 0 or image_index >= len(story["pages"][page_index]["image_urls"]):
-            raise HTTPException(status_code=400, detail=f"Invalid image index for page {page_index}")
-
-    if len(selection.page_selections) != len(story["pages"]):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid number of selections: {len(selection.page_selections)}",
-        )
+    story: Dict = validate_story(maybe_story)
+    validate_selection(selection, story)
 
     # Append the new selection to the array in the "selections" collection
     updated_selection = mongo_client.story_time.selections.find_one_and_update(
@@ -171,8 +193,43 @@ def set_story_selections(story_id: str, selection: Selection, current_user: User
     return mongodb_json_response(updated_selection)
 
 
+def validate_story(story: Optional[Any]) -> Dict:
+    """
+    Validate a loaded story.  Raises HTTPException if the story is invalid.
+    """
+    if not story:
+        raise HTTPException(status_code=404, detail="Story not found")
+    if "pages" not in story:
+        raise HTTPException(status_code=404, detail="Story does not contain pages")
+
+    return story
+
+
+def validate_selection(selection: Selection, story: Dict) -> None:
+    """
+    Validate a loaded selection.  Raises HTTPException if the selection is invalid.
+    """
+
+    # ensure that each index is in range of the number of images in page
+    for page_index, image_index in enumerate(selection.page_selections):
+        if page_index < 0 or page_index >= len(story["pages"]):
+            raise HTTPException(status_code=400, detail=f"Invalid page index: {page_index}")
+        if image_index < 0 or image_index >= len(story["pages"][page_index]["image_urls"]):
+            raise HTTPException(status_code=400, detail=f"Invalid image index for page {page_index}")
+
+    # ensure that the number of selections matches the number of pages
+    if len(selection.page_selections) != len(story["pages"]):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid number of selections: {len(selection.page_selections)}",
+        )
+
+
 @api.get("/api/story/{story_id}/selections")
-def get_story_selections(story_id: str, current_user: User = Depends(get_current_user)):
+def get_story_selections(story_id: str, current_user: User = Depends(get_current_user)) -> Response:
+    """
+    Get the selections for a given story
+    """
     selection = mongo_client.story_time.selections.find_one({"story_id": ObjectId(story_id)})
     if not selection:
         raise HTTPException(status_code=404, detail="Selections for story not found")
@@ -181,7 +238,11 @@ def get_story_selections(story_id: str, current_user: User = Depends(get_current
 
 
 @api.post("/api/story/{story_id}/publish")
-def publish_story(story_id: str, current_user: User = Depends(get_current_user)):
+def publish_story(story_id: str, current_user: User = Depends(get_current_user)) -> Dict:
+    """
+    Create a story document that only has the selected data in it, upload the story document to S3 (the images are already there),
+    and then update the latest selection document in S3 to point to the new story.
+    """
     story = find_story_by_id(story_id)
     selections = find_selections_by_story_id(story_id)
 
@@ -246,7 +307,7 @@ def extract_latest_selections(selections: Dict, story: Dict) -> List:
     return latest_selection
 
 
-def read_latest_stories(s3_client, bucket_name, latest_story_key):
+def read_latest_stories(s3_client, bucket_name, latest_story_key) -> List:
     try:
         json_str = s3_client.get_object(bucket_name, latest_story_key).decode("utf-8")
         return json.loads(json_str)
@@ -267,19 +328,19 @@ def upload_story_to_s3(
     story_object_key,
     latest_stories,
     latest_story_key,
-):
+) -> None:
     s3_client.upload_object(json.dumps(story_data), bucket_name, story_object_key)
     latest_stories.insert(0, story_object_key)
     s3_client.upload_object(json.dumps(latest_stories), bucket_name, latest_story_key)
 
 
-def generate_story_object_key(username: str):
+def generate_story_object_key(username: str) -> str:
     timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
     return f"{username}/stories/{timestamp}_story.json"
 
 
 @api.exception_handler(Exception)
-async def generic_exception_handler(request: Request, exc: Exception):
+async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     exception_messsage = f"Unhandled exception: {exc} - Path: {request.url.path}"
     print(exception_messsage)
     return JSONResponse(status_code=500, content={"message": exception_messsage})
@@ -287,6 +348,9 @@ async def generic_exception_handler(request: Request, exc: Exception):
 
 @api.post("/api/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    OAuth2 compatible token login, get an access token for future requests.
+    """
     user = authenticate_user(hard_coded_users_db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -300,5 +364,5 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 @api.get("/users/me/", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_user)):
+async def read_users_me(current_user: User = Depends(get_current_user)) -> User:
     return current_user
