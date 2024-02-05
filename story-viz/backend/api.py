@@ -18,6 +18,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 from .secrets import setup_environment_variables
+<<<<<<< HEAD
 
 setup_environment_variables()
 
@@ -25,8 +26,19 @@ mongodb_password = os.environ["MONGODB_STORY_TIME_EDITOR_PASSWORD"]
 mongo_uri = (
     f"mongodb+srv://story_time_editor:{mongodb_password}@freecluster.wk9cvp6.mongodb.net/?retryWrites=true&w=majority"
 )
+=======
 
-jwt_secret_key = os.environ["JWT_SECRET_KEY"]
+setup_environment_variables()
+
+>>>>>>> 844b38e (Add linting and testing for story-viz)
+
+mongodb_password = os.getenv("MONGODB_STORY_TIME_EDITOR_PASSWORD", "NO_PASSWORD_SET")
+
+mongo_uri = (
+    f"mongodb+srv://story_time_editor:{mongodb_password}@freecluster.wk9cvp6.mongodb.net/?retryWrites=true&w=majority"
+)
+
+jwt_secret_key = os.getenv("JWT_SECRET_KEY", "NO_SECRET_KEY_SET")
 JWT_ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 

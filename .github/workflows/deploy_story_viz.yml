@@ -39,21 +39,14 @@ jobs:
         working-directory: story-viz/frontend
         run: npm run build
 
-      - name: Get Python version 
-        run: python --version
-
       - name: Install Python Dependencies
         working-directory: story-viz
         run: |
           pip install -r requirements.txt
 
-      - name: Validate python
+      - name: Validate story-viz
         run: |
           python3 scripts/validate.py
-
-      - name: Copy python lib directory
-        working-directory: story-viz/backend
-        run: ./copy_lib.sh
   
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
