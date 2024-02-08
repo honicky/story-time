@@ -5,6 +5,7 @@ import {
   Route,
   Routes,
   useParams,
+  useSearchParams,
 } from 'react-router-dom';
 import Slideshow from './Slideshow';
 
@@ -40,7 +41,10 @@ const App = () => {
 };
 
 const SlideshowPage = () => {
-  const interval = 20; // Default to 20 seconds, or get it from query if needed
+  // Use useSearchParams hook to access query parameters
+  const [ searchParams ] = useSearchParams();
+  // Get the interval from query parameters or default to 20 seconds
+  const interval = parseInt(searchParams.get('interval')) || 20;
 
   return <SlideshowWrapper interval={interval} />;
 };
