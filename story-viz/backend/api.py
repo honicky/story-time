@@ -1,4 +1,4 @@
-from .lib import object_store_client
+from .lib import object_store_client, image_prompt
 
 from datetime import datetime, timedelta
 from botocore.exceptions import ClientError
@@ -235,6 +235,44 @@ def get_story_selections(story_id: str, current_user: User = Depends(get_current
         raise HTTPException(status_code=404, detail="Selections for story not found")
 
     return mongodb_json_response(selection["selections"])
+
+
+@api.post("/api/story/{story_id}/page/{page_index}/generate_images")
+def generate_images(story_id: str, page_index: int, current_user: User = Depends(get_current_user)) -> Response:
+
+    story = find_story_by_id(story_id)
+
+    if page_index < 0 or page_index >= len(story["pages"]):
+        raise HTTPException(status_code=400, detail=f"Invalid page index: {page_index}")
+
+    page = story["pages"][page_index]
+    image_client = image_prompt.ReplicateClient("playground-v2")
+
+    image_urls = image_client.generate_image(page["image_prompt"])
+
+    update_result = mongo_client.story_time.stories.update_one(
+        {"_id": ObjectId(story_id)},
+        {
+            "$push": {
+                f"pages.{page_index}.image_urls": {
+                    "$each": image_urls,
+                }
+            }
+        },
+    )
+    if update_result.modified_count != 1:
+        return JSONResponse(
+            status_code=400,
+            content={"message": f"Failed to update the image URLs for story {story_id}, page {page_index}"},
+        )
+    else:
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": f"Successfully updated the image URLs for story {story_id}, page {page_index}",
+                "new_image_urls": image_urls,
+            },
+        )
 
 
 @api.post("/api/story/{story_id}/publish")

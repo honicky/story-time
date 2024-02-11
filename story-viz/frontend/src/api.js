@@ -30,8 +30,8 @@ const fetchSelectionsData = async (storyId, token) => {
     const headers = getHeadersWithAuthorization(token);
 
     const selectionsUrl = `${baseApiUrl}/story/${storyId}/selections`;
-      const response = await axios.get(selectionsUrl, {headers});
-      return response.data;
+    const response = await axios.get(selectionsUrl, {headers});
+    return response.data;
   } catch (error) {
     if (error?.response?.status === 404) {
       return []; // Set selections to an empty array if 404
@@ -47,6 +47,11 @@ const postSelections = async (storyId, selectedImages, token) => {
     page_selections: selectedImages
   };
   await axios.post(`${baseApiUrl}/story/${storyId}/selections`, payload, {headers});
+}
+
+const postGenerateImages = async (storyId, pageIndex, token) => {
+  const headers = getHeadersWithAuthorization(token);
+  await axios.post(`${baseApiUrl}/story/${storyId}/page/${pageIndex}/generate_images`, {}, {headers});
 }
 
 const publishStory = async (storyId, token) => {
@@ -68,5 +73,5 @@ const login = async(username, password) => {
 
  }
 
-export { fetchAllStories, fetchStoryData, fetchSelectionsData, login, postSelections, publishStory };
+export { fetchAllStories, fetchStoryData, fetchSelectionsData, login, postGenerateImages, postSelections, publishStory };
 

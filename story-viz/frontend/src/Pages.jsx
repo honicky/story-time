@@ -1,11 +1,13 @@
+import ImageCarousel from './ImageCarousel';
+import LongRunningButton from './LongRunningButton';
+import { postSelections,  } from './api';
 import React, { useState, useEffect } from 'react';
 import styles from './Pages.module.css';
 import { useError } from './ErrorContext';
-import { postSelections } from './api';
 import { useToken } from './TokenContext';
-import { useNavigate } from 'react-router-dom'; // or useNavigate in React Router v6
+import { useNavigate } from 'react-router-dom';
 
-const Pages = ({ pages, selections, storyId }) => {
+const Pages = ({ pages, selections, storyId, handleGenereateImages }) => {
   const [selectedImages, setSelectedImages] = useState([]);
 
   const { setError } = useError();
@@ -18,14 +20,14 @@ const Pages = ({ pages, selections, storyId }) => {
     } else {
       setSelectedImages([]);
     }
-    setError('')
-  }, [pages, selections]);
+    setError('');
+  }, [selections, setError]);
 
   const handleImageSelect = (pageIndex, imageIndex) => {
     const newSelectedImages = [...selectedImages];
     newSelectedImages[pageIndex] = imageIndex;
     setSelectedImages(newSelectedImages);
-    setError('')
+    setError('');
   };
 
   const handleSubmitSelections = async () => {
@@ -52,22 +54,18 @@ const Pages = ({ pages, selections, storyId }) => {
     <div className={styles.pagesContainer}>
       {pages.map((page, pageIndex) => (
         <div key={pageIndex} className={styles.pageContainer}>
-          <div className={styles.imageContainer}>
-            {page.image_urls.map((imageUrl, imageIndex) => (
-              <div key={imageIndex} className={styles.imageWrapper}>
-                <img 
-                  src={imageUrl}
-                  alt={`Page ${pageIndex + 1} Image ${imageIndex + 1}`}
-                  className={`${styles.image} ${selectedImages[pageIndex] === imageIndex ? styles.selectedImage : styles.unselectedImage}`}
-                  onClick={() => handleImageSelect(pageIndex, imageIndex)}
-                />
-              </div>
-            ))}
-          </div>
+          <ImageCarousel
+            images={page.image_urls}
+            selectedIndex={selectedImages[pageIndex]}
+            onSelect={index => handleImageSelect(pageIndex, index)}
+          />
           <div>
             <p className={styles.pageText}>{page.paragraph}</p>
             <p className={styles.pageText}><em>{page.image_prompt}</em></p>
           </div>
+          <LongRunningButton className={styles.submitButton} onClick={() => handleGenereateImages(pageIndex)}>
+            Generate More Images
+          </LongRunningButton>
         </div>
       ))}
       <button className={styles.submitButton} onClick={handleSubmitSelections}>

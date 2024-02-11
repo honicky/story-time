@@ -1,0 +1,46 @@
+  .carouselContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .imagesContainer {
+    display: flex;
+    overflow: hidden;
+  }
+  
+  .imageWrapper {
+    flex: 0 0 auto;
+    width: calc(20% - 10px); /* Adjust based on the number of images you want to show and the desired spacing */
+    margin: 5px; /* This creates 10px total space between images */
+    box-sizing: border-box; /* Ensures the width calculation includes padding and border */
+    position: relative;
+  }
+  
+  .selectedImage {
+    outline: 2px solid blue; /* Highlight or any indication for selected image */
+  }
+  
+  .arrowButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent background */
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+  }
+  
+  .leftArrow {
+    left: 0;
+  }
+  
+  .rightArrow {
+    right: 0;
+  }
+  
+  .carouselImage {
+    width: 100%; /* Adjust if necessary */
+    height: auto;
+  }
+  
