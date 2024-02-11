@@ -1,1 +1,0 @@
-../story-viz/backend/lib/object_store_client.py

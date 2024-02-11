@@ -9,10 +9,10 @@ load_dotenv()
 
 from story_config import story_config
 from util import current_time_ms, url_to_pil_image
-import image_prompt
-import llm_prompt
-import object_store_client
-import mongo_client
+from lib import image_prompt
+from lib import llm_prompt
+from lib import object_store_client
+from lib import mongo_client
 import prompt_templates
 
 import wandb

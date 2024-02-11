@@ -1,1 +1,0 @@
-../story-viz/backend/lib/image_prompt.py
