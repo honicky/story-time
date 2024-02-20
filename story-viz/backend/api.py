@@ -242,13 +242,26 @@ def generate_images(story_id: str, page_index: int, current_user: User = Depends
 
     story = find_story_by_id(story_id)
 
+    image_prompt_str = get_image_prompt(story, page_index)
+    image_client = image_prompt.ReplicateClient("playground-v2")
+    image_urls = image_client.generate_image(image_prompt_str)
+
+    return update_images(story_id, page_index, image_urls)
+
+
+def get_image_prompt(story: Dict, page_index: int) -> str:
+    """
+    Get the image prompt for a page.
+    """
     if page_index < 0 or page_index >= len(story["pages"]):
         raise HTTPException(status_code=400, detail=f"Invalid page index: {page_index}")
+    return story["pages"][page_index]["image_prompt"][-1]
 
-    page = story["pages"][page_index]
-    image_client = image_prompt.ReplicateClient("playground-v2")
 
-    image_urls = image_client.generate_image(page["image_prompt"])
+def update_images(story_id: str, page_index: int, image_urls: List[str]) -> Response:
+    """
+    Update the images for a page.
+    """
 
     update_result = mongo_client.story_time.stories.update_one(
         {"_id": ObjectId(story_id)},
@@ -260,6 +273,7 @@ def generate_images(story_id: str, page_index: int, current_user: User = Depends
             }
         },
     )
+
     if update_result.modified_count != 1:
         return JSONResponse(
             status_code=400,
@@ -271,6 +285,49 @@ def generate_images(story_id: str, page_index: int, current_user: User = Depends
             content={
                 "message": f"Successfully updated the image URLs for story {story_id}, page {page_index}",
                 "new_image_urls": image_urls,
+            },
+        )
+
+
+class ImagePrompt(BaseModel):
+    """
+    A prompt for generating images for a page.
+    """
+
+    prompt: str
+
+
+@api.put("/api/story/{story_id}/page/{page_index}/image_prompt")
+def put_image_prompt(
+    story_id: str, page_index: int, image_prompt: ImagePrompt, current_user: User = Depends(get_current_user)
+) -> Response:
+    """
+    Set the image prompt for a page.
+    """
+    story = find_story_by_id(story_id)
+    if page_index < 0 or page_index >= len(story["pages"]):
+        raise HTTPException(status_code=400, detail=f"Invalid page index: {page_index}")
+
+    update_result = mongo_client.story_time.stories.update_one(
+        {"_id": ObjectId(story_id)},
+        {
+            "$push": {
+                f"pages.{page_index}.image_prompt": image_prompt.prompt,
+            }
+        },
+    )
+
+    if update_result.modified_count != 1:
+        return JSONResponse(
+            status_code=400,
+            content={"message": f"Failed to update the image prompt for story {story_id}, page {page_index}"},
+        )
+    else:
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": f"Successfully updated the image prompt for story {story_id}, page {page_index}",
+                "new_image_prompt": image_prompt.prompt,
             },
         )
 
@@ -289,7 +346,7 @@ def publish_story(story_id: str, current_user: User = Depends(get_current_user))
     published_story: Dict = {"pages": []}
     for page_index, image_index in enumerate(latest_selection):
         page = story["pages"][page_index]
-        published_story["pages"].append({"image_url": page["image_urls"][image_index], "text": page["paragraph"]})
+        published_story["pages"].append({"image_url": page["image_urls"][image_index], "text": page["paragraph"][-1]})
 
     s3_client = object_store_client.Boto3Client()
     bucket_name = "botos-generated-images"

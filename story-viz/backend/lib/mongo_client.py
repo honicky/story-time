@@ -1,7 +1,7 @@
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-import pymongo.errors
 import os
+
 
 class StoryMongoDB:
     def __init__(self):
@@ -12,17 +12,9 @@ class StoryMongoDB:
         self.db = self.client["story_time"]
 
     def insert_story(self, story_document):
-        # try:
-
-        # Insert the story document into the MongoDB collection
         collection = self.db["stories"]
         result = collection.insert_one(story_document)
         return result.inserted_id
 
-        # except pymongo.errors.WriteError as e:
-        #     print(f"Error inserting story: {str(e)}")
-        #     return None
-
     def close_connection(self):
-        # Close the MongoDB connection
         self.client.close()

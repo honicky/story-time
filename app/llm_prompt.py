@@ -1,1 +1,0 @@
-../story-viz/backend/lib/llm_prompt.py

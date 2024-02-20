@@ -8,11 +8,11 @@ import re
 load_dotenv()
 
 from story_config import story_config
-from util import current_time_ms, url_to_pil_image
-import image_prompt
-import llm_prompt
-import object_store_client
-import mongo_client
+from lib.util import current_time_ms
+from lib import image_prompt
+from lib import llm_prompt
+from lib import object_store_client
+from lib import mongo_client
 import prompt_templates
 
 import wandb
@@ -252,16 +252,16 @@ try:
         ]
         story["pages"] = [
             {
-                "paragraph": paragraph,
-                "paragraph_image_prompt": paragraph_image_prompt,
-                "image_prompt": image_prompt,
+                "paragraph": [ paragraph ],
+                "paragraph_image_prompt": [ paragraph_image_prompt ],
+                "image_prompt": [ image_prompt ],
                 "image_urls": generate_image(image_prompt) 
             }
             for paragraph, paragraph_image_prompt, image_prompt in zip(paragraphs, paragraph_image_prompts, image_prompts)
         ]
 
     story["run_name"] = run.name
-    story["version"] = "v2.1.0"
+    story["version"] = "v2.2.0"
     story_id = store_story_in_mongo(story)
 
     print(f"Story id: {story_id}")
