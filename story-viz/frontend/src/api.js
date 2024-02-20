@@ -49,6 +49,15 @@ const postSelections = async (storyId, selectedImages, token) => {
   await axios.post(`${baseApiUrl}/story/${storyId}/selections`, payload, {headers});
 }
 
+const putImagePrompt = async (storyId, pageIndex, imagePrompt, token) => {
+  const headers = getHeadersWithAuthorization(token);
+  const payload = {
+    prompt: imagePrompt
+  };
+  await axios.put(`${baseApiUrl}/story/${storyId}/page/${pageIndex}/image_prompt`, payload, {headers});
+}
+
+
 const postGenerateImages = async (storyId, pageIndex, token) => {
   const headers = getHeadersWithAuthorization(token);
   await axios.post(`${baseApiUrl}/story/${storyId}/page/${pageIndex}/generate_images`, {}, {headers});
@@ -73,5 +82,5 @@ const login = async(username, password) => {
 
  }
 
-export { fetchAllStories, fetchStoryData, fetchSelectionsData, login, postGenerateImages, postSelections, publishStory };
+export { fetchAllStories, fetchStoryData, fetchSelectionsData, login, postGenerateImages, postSelections, publishStory, putImagePrompt };
 

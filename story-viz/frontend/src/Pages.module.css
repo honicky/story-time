@@ -11,3 +11,39 @@
     padding: 10px;
     margin-bottom: 20px;
 }
+
+/* Container for the editable prompt and save button */
+.promptContainer {
+    display: flex;
+    align-items: center; /* Ensure items are vertically centered */
+    width: 100%;
+}
+
+.saveButton {
+    margin-right: 10px; /* Adds some space between the button and the textarea */
+    padding: 5px 10px; /* Adjust padding to your preference */
+    cursor: default; /* Changes the cursor to a pointer to indicate it's clickable */
+    background-color: #007bff; /* Example blue background */
+    color: white; /* White text color */
+    border: none; /* Removes the border */
+    border-radius: 5px; /* Slightly rounded corners for the button */
+    height: fit-content; /* Adjusts the height to fit its content */
+    opacity: 0.3; /* Grey out the button */
+}
+
+.saveButton:not(:disabled) {
+    cursor: pointer; /* Only change cursor for active button */
+    opacity: 1; /* Full opacity for active button */
+}
+
+.editablePrompt {
+    flex-grow: 1; /* Allows the textarea to take up the remaining space */
+    padding: 10px; /* Adds some padding inside the textarea */
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 5px; /* Slightly rounded corners for the textarea */
+    height: auto; /* Auto height to adjust based on the content */
+    min-height: 4em; /* Minimum height to accommodate the entire text plus two lines */
+    resize: vertical; /* Allows the user to resize the textarea vertically */
+    width: calc(100% - 10px - 60px); /* Calculate the width to fill the remaining space, adjust based on your save button width */
+    margin-right: 10px; /* Ensure there's space between the textarea and the save button */
+}

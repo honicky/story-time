@@ -34,7 +34,7 @@ const Story = () => {
     }
   }, [storyId]);
 
-  const handleGenereateImages = async (pageIndex) => {
+  const handleGenerateImages = async (pageIndex) => {
     const isPayloadValid = Number.isInteger(pageIndex) &&
                            pageIndex >= 0 &&
                            pageIndex < data.pages.length;
@@ -60,7 +60,7 @@ const Story = () => {
     <div>
         <ErrorMessage />
         <Metadata data={data} storyUrl={storyUrl} />
-        <Pages pages={data.pages} selections={selections} storyId={storyId} handleGenereateImages={handleGenereateImages}/>
+        <Pages pages={data.pages} selections={selections} storyId={storyId} handleGenerateImages={handleGenerateImages}/>
     </div>
   );
 };

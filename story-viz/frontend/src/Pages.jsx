@@ -1,14 +1,16 @@
+import React, { useState, useEffect } from 'react';
 import ImageCarousel from './ImageCarousel';
 import LongRunningButton from './LongRunningButton';
-import { postSelections,  } from './api';
-import React, { useState, useEffect } from 'react';
+import { postSelections, putImagePrompt } from './api';
 import styles from './Pages.module.css';
 import { useError } from './ErrorContext';
 import { useToken } from './TokenContext';
 import { useNavigate } from 'react-router-dom';
 
-const Pages = ({ pages, selections, storyId, handleGenereateImages }) => {
+const Pages = ({ pages, selections, storyId, handleGenerateImages }) => {
   const [selectedImages, setSelectedImages] = useState([]);
+  const [editablePrompts, setEditablePrompts] = useState({});
+  const [hasEdited, setHasEdited] = useState({});
 
   const { setError } = useError();
   const { token } = useToken();
@@ -21,13 +23,47 @@ const Pages = ({ pages, selections, storyId, handleGenereateImages }) => {
       setSelectedImages([]);
     }
     setError('');
-  }, [selections, setError]);
+    // Initialize editable prompts
+    const initialPrompts = pages.reduce((acc, page, index) => {
+      acc[index] = page.image_prompt[page.image_prompt.length - 1] || '';
+      return acc;
+    }, {});
+    setEditablePrompts(initialPrompts);
+    setHasEdited({});
+  }, [pages, selections, setError]);
 
   const handleImageSelect = (pageIndex, imageIndex) => {
     const newSelectedImages = [...selectedImages];
     newSelectedImages[pageIndex] = imageIndex;
     setSelectedImages(newSelectedImages);
     setError('');
+  };
+
+  const handlePromptChange = (pageIndex, newValue) => {
+    setEditablePrompts(prev => ({ ...prev, [pageIndex]: newValue }));
+    setHasEdited(prev => ({ ...prev, [pageIndex]: true }));
+  };
+
+  const saveImagePrompt = async (pageIndex) => {
+    if (!hasEdited[pageIndex]) return; // Only save if edited
+    setError('');
+    try {
+      // Placeholder for save logic; replace with your actual API call
+      console.log('Saving prompt for page', pageIndex, ':', editablePrompts[pageIndex]);
+      await putImagePrompt(storyId, pageIndex, editablePrompts[pageIndex], token);
+      setHasEdited(prev => ({ ...prev, [pageIndex]: false })); // Reset edited state after saving
+    } catch (error) {
+      setError('Error saving image prompt:', error);
+    }
+  };
+
+  const handleGenerateImagesWithSave = async (pageIndex) => {
+    try {
+      await saveImagePrompt(pageIndex);
+      await handleGenerateImages(pageIndex);
+    } catch (error) {
+      setError('Error generating images:', error);
+    }
   };
 
   const handleSubmitSelections = async () => {
@@ -60,10 +96,26 @@ const Pages = ({ pages, selections, storyId, handleGenereateImages }) => {
             onSelect={index => handleImageSelect(pageIndex, index)}
           />
           <div>
-            <p className={styles.pageText}>{page.paragraph}</p>
-            <p className={styles.pageText}><em>{page.image_prompt}</em></p>
+            <p className={styles.pageText}>{page.paragraph[page.paragraph.length - 1]}</p>
+            <div className={styles.editablePromptContainer}>
+              <textarea
+                className={styles.editablePrompt}
+                value={editablePrompts[pageIndex]}
+                onChange={(e) => handlePromptChange(pageIndex, e.target.value)}
+              />
+              <button
+                className={styles.saveButton}
+                disabled={!hasEdited[pageIndex]}
+                onClick={() => saveImagePrompt(pageIndex)}
+              >
+                Save Image Prompt
+              </button>
+            </div>
           </div>
-          <LongRunningButton className={styles.submitButton} onClick={() => handleGenereateImages(pageIndex)}>
+          <LongRunningButton 
+            className={styles.submitButton} 
+            onClick={() => handleGenerateImagesWithSave(pageIndex)}
+          >
             Generate More Images
           </LongRunningButton>
         </div>
