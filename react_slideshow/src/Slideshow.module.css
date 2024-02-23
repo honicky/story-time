@@ -24,7 +24,9 @@
   text-align: left; /* Text aligned to the left */
   padding: 20px;
   height: 100%;
-  font-size: 20pt; /* Set your desired font size */
+  margin-left: 20px;
+  margin-right: 20px;
+  font-size: 30pt; /* Set your desired font size */
   line-height: 1.7; /* 1.5 line spacing */
   overflow-y: auto; /* Allows scrolling if text is longer than the container */
   color: #333
