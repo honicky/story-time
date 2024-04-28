@@ -150,3 +150,15 @@ For each scene, render XML that contains the following tags:
 
 Be sure to use XML as described above, and to wrap each scene in <scene></scene> tags.
 """
+
+def generate_extract_character_prompt(story_text):
+  return f"""
+The following is a short story.`
+
+{story_text}
+
+Who are the named characters who appear in this story?
+Answer with a json list of their names and nothing else. Here is an example (you need to put the names from the story instead of these values):
+[ "Fred", "George", "Perriwinkle the Fox" ]
+Do not add any other text at all. If you add other text, I will lose my job, and babies will die for every extra word
+"""

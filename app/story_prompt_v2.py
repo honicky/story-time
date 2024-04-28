@@ -128,7 +128,7 @@ try:
     # dalle_client = DalleClient(openai_api_token)
     # beam_api_token = os.environ.get("BEAM_SECRET_KEY_UUENCODED")
     # image_client = image_prompt.StableDiffusionClient(beam_api_token, "botos-generated-images", "dev-test-user")
-    image_client = image_prompt.ReplicateClient("playground-v2")
+    image_client = image_prompt.ReplicateClient("playground-v2.5")
 
     def generate_image(prompt):
         print(f"Generating image for prompt: {prompt} ...", end="", flush=True )

@@ -243,7 +243,7 @@ def generate_images(story_id: str, page_index: int, current_user: User = Depends
     story = find_story_by_id(story_id)
 
     image_prompt_str = get_image_prompt(story, page_index)
-    image_client = image_prompt.ReplicateClient("playground-v2")
+    image_client = image_prompt.ReplicateClient("playground-v2.5")
     image_urls = image_client.generate_image(image_prompt_str)
 
     return update_images(story_id, page_index, image_urls)

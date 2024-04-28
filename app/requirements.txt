@@ -1,6 +1,9 @@
 boto3
-dotenv
 openai
 Pillow
+pandas
+pyarrow
+pymongo[srv]
+python-dotenv
 replicate
 wandb

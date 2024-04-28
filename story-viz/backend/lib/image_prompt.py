@@ -294,12 +294,28 @@ class ReplicateClient:
                 },
                 "supports_multiple": False,
             },
+            "playground-v2.5": {
+                "id": "playgroundai/playground-v2.5-1024px-aesthetic:a45f82a1382bed5c7aeb861dac7c7d191b0fdf74d8d57c4a0e6ed7d4d0bf7d24",
+                "parameters": {
+                    "width": 1024,
+                    "height": 1024,
+                    "scheduler": "DPMSolver++",
+                    "num_outputs": 4,
+                    "guidance_scale": 3,
+                    "apply_watermark": True,
+                    "prompt_strength": 0.8,
+                    "num_inference_steps": 25
+                },
+                "supports_multiple": True,
+            }
+
         }
         self.model_name = model_name
         self.image_count = image_count
 
-    def generate_image(self, prompt, negative_prompt=""):
-
+    def generate_image(self, prompt, negative_prompt=None):
+        if negative_prompt is None:
+            negative_prompt = "ugly, deformed, noisy, blurry, distorted"
         model = self.models[self.model_name].copy()
         model["parameters"]["prompt"] = prompt
         model["parameters"]["negative_prompt"] = negative_prompt
