@@ -304,11 +304,10 @@ class ReplicateClient:
                     "guidance_scale": 3,
                     "apply_watermark": True,
                     "prompt_strength": 0.8,
-                    "num_inference_steps": 25
+                    "num_inference_steps": 25,
                 },
                 "supports_multiple": True,
-            }
-
+            },
         }
         self.model_name = model_name
         self.image_count = image_count

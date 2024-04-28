@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from openai import OpenAI
-import replicate
+import replicate  # type: ignore
 from .util import current_time_ms
 from wandb.sdk.data_types.trace_tree import Trace
 
@@ -71,6 +71,7 @@ class GTP4LLM:
 
         return response_text.strip()
 
+
 class OpenAILLM:
     def __init__(self, api_token) -> None:
         self.api_token = api_token
@@ -83,9 +84,7 @@ class OpenAILLM:
                 "role": "system",
                 "content": "You are a children's book author helping me write a children's book for my friend's children",
             },
-            {
-                "role": "user", "content": prompt
-            }
+            {"role": "user", "content": prompt},
         ]
 
         response = self.client.chat.completions.create(model=model_name, messages=messages, **non_default_params)
@@ -93,90 +92,91 @@ class OpenAILLM:
 
         return response_text.strip()
 
+
 class ReplicateLLM:
 
     models = {
         "mixtral": {
             "id": "mistralai/mixtral-8x7b-instruct-v0.1",
             "parameters": {
-            "top_k": 50,
-            "top_p": 0.9,
-            "prompt": None,
-            "temperature": 0,
-            "max_new_tokens": 1024,
-            "prompt_template": "<s>[INST] {prompt} [/INST] ",
-            "presence_penalty": 0,
-            "frequency_penalty": 0
+                "top_k": 50,
+                "top_p": 0.9,
+                "prompt": None,
+                "temperature": 0,
+                "max_new_tokens": 1024,
+                "prompt_template": "<s>[INST] {prompt} [/INST] ",
+                "presence_penalty": 0,
+                "frequency_penalty": 0,
             },
         },
         "llama-2-70b": {
-            "id": "meta/llama-2-70b-chat",    
+            "id": "meta/llama-2-70b-chat",
             "parameters": {
-            "debug": False,
-            "top_k": 50,
-            "top_p": 1,
-            "prompt": None,
-            "temperature": 0.5,
-            "system_prompt": "You are a helpful, respectful and honest assistant.",
-            "max_new_tokens": 500,
-            "min_new_tokens": -1
+                "debug": False,
+                "top_k": 50,
+                "top_p": 1,
+                "prompt": None,
+                "temperature": 0.5,
+                "system_prompt": "You are a helpful, respectful and honest assistant.",
+                "max_new_tokens": 500,
+                "min_new_tokens": -1,
             },
         },
         "codellama-7b-instruct": {
             "id": "meta/codellama-7b-instruct:aac3ab196f8a75729aab9368cd45ea6ad3fc793b6cda93b1ded17299df369332",
             "parameters": {
-            "top_k": 250,
-            "top_p": 0.95,
-            "prompt": None,
-            "max_tokens": 500,
-            "temperature": 0.95,
-            "system_prompt": "",
-            "repeat_penalty": 1.1,
-            "presence_penalty": 0,
-            "frequency_penalty": 0
-            }
+                "top_k": 250,
+                "top_p": 0.95,
+                "prompt": None,
+                "max_tokens": 500,
+                "temperature": 0.95,
+                "system_prompt": "",
+                "repeat_penalty": 1.1,
+                "presence_penalty": 0,
+                "frequency_penalty": 0,
+            },
         },
         "codellama-13b-instruct": {
             "id": "meta/codellama-13b-instruct:a5e2d67630195a09b96932f5fa541fe64069c97d40cd0b69cdd91919987d0e7f",
             "parameters": {
-            "top_k": 250,
-            "top_p": 0.95,
-            "prompt": None,
-            "max_tokens": 500,
-            "temperature": 0.95,
-            "system_prompt": "",
-            "repeat_penalty": 1.1,
-            "presence_penalty": 0,
-            "frequency_penalty": 0
-            }
+                "top_k": 250,
+                "top_p": 0.95,
+                "prompt": None,
+                "max_tokens": 500,
+                "temperature": 0.95,
+                "system_prompt": "",
+                "repeat_penalty": 1.1,
+                "presence_penalty": 0,
+                "frequency_penalty": 0,
+            },
         },
         "codellama-34b-instruct": {
             "id": "meta/codellama-34b-instruct:eeb928567781f4e90d2aba57a51baef235de53f907c214a4ab42adabf5bb9736",
             "parameters": {
-            "top_k": 50,
-            "top_p": 0.9,
-            "prompt": None,
-            "max_tokens": 500,
-            "temperature": 0.75,
-            "system_prompt": "Responses should be written in Python.",
-            "repeat_penalty": 1.1,
-            "presence_penalty": 0,
-            "frequency_penalty": 0
-            }
+                "top_k": 50,
+                "top_p": 0.9,
+                "prompt": None,
+                "max_tokens": 500,
+                "temperature": 0.75,
+                "system_prompt": "Responses should be written in Python.",
+                "repeat_penalty": 1.1,
+                "presence_penalty": 0,
+                "frequency_penalty": 0,
+            },
         },
         "codellama-70b-instruct": {
             "id": "meta/codellama-70b-instruct:a279116fe47a0f65701a8817188601e2fe8f4b9e04a518789655ea7b995851bf",
             "parameters": {
-            "top_k": 10,
-            "top_p": 0.95,
-            "prompt": None,
-            "max_tokens": 500,
-            "temperature": 0.8,
-            "system_prompt": "",
-            "repeat_penalty": 1.1,
-            "presence_penalty": 0,
-            "frequency_penalty": 0
-            }
+                "top_k": 10,
+                "top_p": 0.95,
+                "prompt": None,
+                "max_tokens": 500,
+                "temperature": 0.8,
+                "system_prompt": "",
+                "repeat_penalty": 1.1,
+                "presence_penalty": 0,
+                "frequency_penalty": 0,
+            },
         },
     }
 
@@ -189,9 +189,5 @@ class ReplicateLLM:
         parameters.update(non_default_params)
         parameters["prompt"] = prompt
 
-        for event in replicate.run(
-            ReplicateLLM.models[self.model_name]["id"],
-            parameters
-        ):
+        for event in replicate.run(ReplicateLLM.models[self.model_name]["id"], parameters):
             yield str(event)
-
