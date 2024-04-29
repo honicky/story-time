@@ -11,6 +11,9 @@ env:
   PRODUCTION_WORKLOAD_IDENTITY_PROVIDER: "projects/722541659860/locations/global/workloadIdentityPools/github/providers/botos"
   GCP_PROJECT_ID: ${{ github.ref == 'refs/heads/master' && vars.GCP_PROJECT_ID_PROD || vars.GCP_PROJECT_ID_STAGING }}
 
+permissions:
+  id-token: write
+
 jobs:
   deploy:
     # Add "id-token" with the intended permissions.
