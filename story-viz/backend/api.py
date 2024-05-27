@@ -239,6 +239,9 @@ def get_story_selections(story_id: str, current_user: User = Depends(get_current
 
 @api.post("/api/story/{story_id}/page/{page_index}/generate_images")
 def generate_images(story_id: str, page_index: int, current_user: User = Depends(get_current_user)) -> Response:
+    """
+    Generate images for a given page, appending them to the list of images for that page.
+    """
 
     story = find_story_by_id(story_id)
 
