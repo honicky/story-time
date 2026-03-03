@@ -21,13 +21,8 @@ class GTP4LLM:
             }
         ]
 
-    def generate_text(self, prompt, wandb_parent_span, model_name="gpt-4-1106-preview"):
-        # Append the user's prompt to the chat history
+    def generate_text(self, prompt, wandb_parent_span, model_name="gpt-4o"):
         self.chat_history.append({"role": "user", "content": prompt})
-
-        # Call the GPT-4 model
-        # model_name = "gpt-4"
-        # model_name = "gpt-4-1106-preview"
         start_time = current_time_ms()
 
         try:
@@ -65,7 +60,6 @@ class GTP4LLM:
         wandb_parent_span._span.end_time_ms = end_time
 
         if status == "success":
-            # Extract and append the model's reply to the chat history
             self.chat_history.append({"role": "assistant", "content": response_text})
 
         return response_text.strip()

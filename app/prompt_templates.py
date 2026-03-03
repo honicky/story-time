@@ -14,17 +14,11 @@ Consider the following description as inspiration:
 {setting_description}.
 For example, '{setting_example}'.
 
-The setting should be appropriate for a {tone_type} tone. 
+The setting should be appropriate for a {tone_type} tone.
 Consider the following description as inspiration:
 {tone_description}.
 For example, '{tone_example}'.
 """
-
-    #     if cultural_setting is not None:
-    #         prompt += f"""
-    # Also, infuse elements of {cultural_setting['type']} into the setting.
-    # Consider aspects such as {cultural_setting['description']}.
-    # """
 
     if specific_setting_type is not None:
         prompt += f"""
@@ -61,7 +55,7 @@ Use only about 3 sentences to describe the character.
 """
 
 
-def generate_setting_prompt_for_sdxl(setting_description):
+def generate_setting_image_prompt(setting_description):
     return f"""Use the following setting description to create an image prompt for a text-to-image model:
 
 {setting_description}
@@ -70,20 +64,19 @@ The output should be about ten words that captures the most important visual ele
 objects, colors, textures and mood.  Do not include description of characters in the setting.
 """
 
-def generate_character_prompt_for_sdxl(character_description):
+
+def generate_character_image_prompt(character_description):
     return f"""Use the following character description to create an image prompt for a text-to-image model:
 
 {character_description}
 
 The output should be about ten words that captures the most important visual elements of the character, including species if not human,
-gender, skin, hair, eyes, clothing, accessories, stature.  Make sure to include gender and species.  Really include species if not human,
-and gender or an innocent puppy will die. 
+gender, skin, hair, eyes, clothing, accessories, stature.  Make sure to include gender and species.
 Do not include description of the setting.
 """
 
 
 def generate_story_prompt(story):
-
     return f"""
 Here is the setting of the story:
 {story['setting']['setting_text']}
@@ -92,7 +85,7 @@ Here is the main character for the story:
 {story['character']['description']}
 
 This story is a {story['outline']['StoryStructure']['type']} story
-with a {story['outline']['Tone']['type']} tone. 
+with a {story['outline']['Tone']['type']} tone.
 
 A {story['outline']['StoryStructure']['type']} type story can be described as
 {story['outline']['StoryStructure']['description']}. Please take inspiration from
@@ -105,6 +98,7 @@ Please generate a story based on this information. The story should be about
 5-10 paragraphs long.  Each paragraph should only be 1-2 simple sentences,
 appropriate for a 3 year old child to follow easily.
 """
+
 
 def generate_paragraph_image_prompt(setting_text, character_description, story_paragraph_text):
     return f"""
@@ -120,33 +114,6 @@ def generate_paragraph_image_prompt(setting_text, character_description, story_p
     Always included exactly the following details about the main character:
     1. Species (if not human)
     2. Gender (if human)
-    Do not include anyextra detail about the setting or character except for what is explicitly mentioned
+    Do not include any extra detail about the setting or character except for what is explicitly mentioned
     in the Action paragraph.
     """
-
-
-def generate_numbered_list_str(items):
-    return "\n".join(
-        f"""{i+1}. {item}"""
-        for i, item in enumerate(items)
-    )
-
-def generate_subsettings_str(story):
-    return generate_numbered_list_str(story["setting"]["setting_prompts"])
-
-
-def parse_story_skeleton_prompt():
-    return """Ok, now take the story skeleton you have generated above, and parse out the components
-from the scene.
-
-For each scene, render XML that contains the following tags:
-<scene></scene> - this tag should wrap the entire scene
-<setting-id></setting-id> - this tag should contain the id of the setting of the scene
-<setting-name></setting-name> - this tag should contain the name of the setting of the scene
-<setting-description></setting-description> - this tag should contain the description of the setting
-<character-ids></character-ids> - this tag should contain a comma separated list of the ids of the characters in the scene 
-<other-people></other-people> - this tag should contain a description of the other people in the scene
-<text></text> - scene text
-
-Be sure to use XML as described above, and to wrap each scene in <scene></scene> tags.
-"""
