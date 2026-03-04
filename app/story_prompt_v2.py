@@ -119,7 +119,7 @@ def store_story_in_mongo(story_descriptor):
 
 try:
     openai_api_token = os.environ.get("OPENAI_API_TOKEN")
-    image_client = image_prompt.DalleClient(openai_api_token)
+    image_client = image_prompt.OpenAIImageClient(openai_api_token)
 
     def generate_image(prompt):
         print(f"Generating image for prompt: {prompt} ...", end="", flush=True)

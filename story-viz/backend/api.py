@@ -247,7 +247,7 @@ def generate_images(story_id: str, page_index: int, current_user: User = Depends
 
     image_prompt_str = get_image_prompt(story, page_index)
     openai_api_token = os.getenv("OPENAI_API_TOKEN")
-    image_client = image_prompt.DalleClient(openai_api_token)
+    image_client = image_prompt.OpenAIImageClient(openai_api_token)
     image_urls = image_client.generate_image(image_prompt_str)
 
     return update_images(story_id, page_index, image_urls)
