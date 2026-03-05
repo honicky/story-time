@@ -15,7 +15,6 @@ pymongo[srv]
 pytest
 python-dotenv
 python-multipart
-replicate
 requests
 types-passlib
 types-Pillow

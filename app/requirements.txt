@@ -2,5 +2,4 @@ boto3
 dotenv
 openai
 Pillow
-replicate
 wandb
